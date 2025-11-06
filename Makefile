@@ -131,12 +131,12 @@ manifests: generate
 ## install: Install CRDs into the cluster
 install: manifests
 	@echo "Installing CRDs..."
-	kubectl apply -f config/crd/
+	kubectl apply -k config/crd/
 
 ## uninstall: Uninstall CRDs from the cluster
 uninstall:
 	@echo "Uninstalling CRDs..."
-	kubectl delete -f config/crd/ --ignore-not-found=true
+	kubectl delete -k config/crd/ --ignore-not-found=true
 
 ## deploy: Deploy controllers to the cluster
 deploy: manifests
