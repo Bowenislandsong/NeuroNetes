@@ -117,7 +117,9 @@ generate:
 	@echo "Generating code..."
 	@which controller-gen > /dev/null || (echo "Installing controller-gen..." && go install sigs.k8s.io/controller-tools/cmd/controller-gen@latest)
 	controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./api/..."
-	controller-gen crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd
+	# `trivialVersions` was removed/renamed in some controller-gen releases.
+	# Use explicit crdVersions (v1) which is supported across controller-gen versions.
+	controller-gen crd:crdVersions=v1 rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd
 
 ## manifests: Generate Kubernetes manifests
 manifests: generate
