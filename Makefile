@@ -180,4 +180,36 @@ docs:
 	@which godoc > /dev/null || (echo "Installing godoc..." && go install golang.org/x/tools/cmd/godoc@latest)
 	@echo "Run 'godoc -http=:6060' to view documentation at http://localhost:6060"
 
+## docker-compose-up: Start local services with docker-compose
+docker-compose-up:
+	@echo "Starting local services..."
+	docker-compose up -d
+	@echo "Services started. Access:"
+	@echo "  - Redis: localhost:6379"
+	@echo "  - NATS: localhost:4222"
+	@echo "  - Weaviate: localhost:8080"
+	@echo "  - Prometheus: localhost:9090"
+	@echo "  - Grafana: localhost:3000 (admin/admin)"
+	@echo "  - NeuroNetes: localhost:8081"
+
+## docker-compose-down: Stop local services
+docker-compose-down:
+	@echo "Stopping local services..."
+	docker-compose down
+
+## docker-compose-logs: View logs from docker-compose services
+docker-compose-logs:
+	docker-compose logs -f
+
+## docker-compose-ps: Check status of docker-compose services
+docker-compose-ps:
+	docker-compose ps
+
+## local-test: Quick local test with docker-compose
+local-test: docker-compose-up
+	@echo "Waiting for services to be ready..."
+	@sleep 10
+	@echo "Running tests against local services..."
+	$(GOTEST) -v -tags=integration ./test/integration/...
+
 .DEFAULT_GOAL := help

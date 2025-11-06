@@ -230,6 +230,8 @@ spec:
 - [Observability Guide](docs/observability.md) - Metrics, logging, and tracing
 - [Security Guide](docs/security.md) - Multi-tenancy and isolation
 - [Operations Guide](docs/operations.md) - Deployment and maintenance
+- [Local Development Guide](docs/local-development.md) - Docker & Kind setup
+- [Plugin Guide](docs/plugins.md) - Creating custom algorithms
 
 ## Examples
 
@@ -240,6 +242,41 @@ spec:
 - [Spot Instance Integration](examples/spot-integration/) - SLO-aware spot usage
 
 ## Development
+
+### Quick Start with Docker Compose
+
+```bash
+# Start local services (Redis, NATS, Weaviate, Prometheus, Grafana)
+make docker-compose-up
+
+# Access services:
+# - Grafana: http://localhost:3000 (admin/admin)
+# - Prometheus: http://localhost:9090
+# - Weaviate: http://localhost:8080
+# - NeuroNetes: http://localhost:8081
+
+# View logs
+make docker-compose-logs
+
+# Stop services
+make docker-compose-down
+```
+
+### Local Kubernetes with Kind
+
+```bash
+# Create local cluster with 3 nodes
+make dev
+
+# Deploy example resources
+kubectl apply -f config/samples/
+
+# Check status
+kubectl get models,agentclasses,agentpools
+
+# Clean up
+make dev-clean
+```
 
 ### Building from Source
 
@@ -256,6 +293,39 @@ make test-integration
 # Run e2e tests
 make test-e2e
 ```
+
+### Developing Custom Plugins
+
+NeuroNetes provides a plugin framework for custom algorithms:
+
+```go
+// Create custom scheduler plugin
+type MyScheduler struct{}
+
+func (s *MyScheduler) Filter(ctx context.Context, pod *corev1.Pod, 
+    node *corev1.Node, pool *neuronetes.AgentPool) bool {
+    // Custom filtering logic
+    return true
+}
+
+func (s *MyScheduler) Score(ctx context.Context, pod *corev1.Pod, 
+    node *corev1.Node, pool *neuronetes.AgentPool) int64 {
+    // Custom scoring logic
+    return 80
+}
+
+// Register plugin
+func init() {
+    plugins.RegisterScheduler(&MyScheduler{})
+}
+```
+
+See [Plugin Guide](docs/plugins.md) for details on creating:
+- Scheduler plugins
+- Autoscaler plugins
+- Model loader plugins
+- Guardrail plugins
+- Metrics provider plugins
 
 ### Contributing
 
