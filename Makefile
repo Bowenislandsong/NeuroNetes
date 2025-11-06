@@ -208,7 +208,7 @@ docs:
 ## docker-compose-up: Start local services with docker-compose
 docker-compose-up:
 	@echo "Starting local services..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "Services started. Access:"
 	@echo "  - Redis: localhost:6379"
 	@echo "  - NATS: localhost:4222"
@@ -220,15 +220,15 @@ docker-compose-up:
 ## docker-compose-down: Stop local services
 docker-compose-down:
 	@echo "Stopping local services..."
-	docker-compose down
+	docker compose down
 
 ## docker-compose-logs: View logs from docker-compose services
 docker-compose-logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 ## docker-compose-ps: Check status of docker-compose services
 docker-compose-ps:
-	docker-compose ps
+	docker compose ps
 
 ## local-test: Quick local test with docker-compose
 local-test: docker-compose-up

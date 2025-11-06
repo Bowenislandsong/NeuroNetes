@@ -61,7 +61,7 @@ jobs:
 
       - name: Check service health
         run: |
-          docker-compose ps
+          docker compose ps
           curl -f http://localhost:6379 || echo "Redis: OK"
           curl -f http://localhost:4222 || echo "NATS: OK"
           curl -f http://localhost:8080/v1/.well-known/ready || echo "Weaviate: OK"

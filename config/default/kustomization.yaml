@@ -1,0 +1,26 @@
+# Kustomization for NeuroNetes deployment
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for all resources
+namespace: neuronetes-system
+
+# Resources to include
+resources:
+  - ../crd
+  - ../rbac
+
+# Common labels for all resources
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: neuronetes
+      app.kubernetes.io/version: v0.1.0
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/part-of: neuronetes
+
+# Images to use
+images:
+  - name: controller
+    newName: ghcr.io/bowenislandsong/neuronetes
+    newTag: v0.1.0

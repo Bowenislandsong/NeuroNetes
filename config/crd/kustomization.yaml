@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - neuronetes.io_agentclasses.yaml
+  - neuronetes.io_agentpools.yaml
+  - neuronetes.io_models.yaml
+  - neuronetes.io_toolbindings.yaml
