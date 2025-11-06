@@ -49,9 +49,9 @@ kubeconfig
 *.tar.gz
 *.zip
 
-# Generated files
-zz_generated.*
-!api/v1alpha1/zz_generated.deepcopy.go
+# Generated files (should be regenerated at build time)
+api/v1alpha1/zz_generated.deepcopy.go
+config/crd/*.yaml
 
 # Local development
 .env

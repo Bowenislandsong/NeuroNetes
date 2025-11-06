@@ -13,6 +13,8 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 GOMOD=$(GOCMD) mod
+GOPATH=$(shell $(GOCMD) env GOPATH)
+CONTROLLER_GEN=$(GOPATH)/bin/controller-gen
 
 # Directories
 CONTROLLER_DIR=controllers
@@ -115,16 +117,14 @@ deps:
 ## generate: Generate code (CRDs, clients, etc.)
 generate:
 	@echo "Generating code..."
-	@which controller-gen > /dev/null || (echo "Installing controller-gen..." && go install sigs.k8s.io/controller-tools/cmd/controller-gen@latest)
-	controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./api/..."
-	# `trivialVersions` was removed/renamed in some controller-gen releases.
-	# Use explicit crdVersions (v1) which is supported across controller-gen versions.
-	controller-gen crd:crdVersions=v1 rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd
+	@test -f $(CONTROLLER_GEN) || (echo "Installing controller-gen..." && $(GOCMD) install sigs.k8s.io/controller-tools/cmd/controller-gen@latest)
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/..."
+	$(CONTROLLER_GEN) crd:allowDangerousTypes=true,crdVersions=v1 rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd
 
 ## manifests: Generate Kubernetes manifests
 manifests: generate
 	@echo "Generating manifests..."
-	controller-gen crd paths="./api/..." output:crd:artifacts:config=config/crd
+	$(CONTROLLER_GEN) crd:allowDangerousTypes=true,crdVersions=v1 paths="./api/..." output:crd:artifacts:config=config/crd
 	kustomize build config/default > config/deploy/neuronetes.yaml
 
 ## install: Install CRDs into the cluster
