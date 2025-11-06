@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: neuronetes-metrics
+  namespace: neuronetes-system
+  labels:
+    app: neuronetes
+spec:
+  selector:
+    matchLabels:
+      app: neuronetes-controller
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    scheme: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neuronetes-metrics
+  namespace: neuronetes-system
+  labels:
+    app: neuronetes-controller
+spec:
+  selector:
+    control-plane: controller-manager
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+    protocol: TCP

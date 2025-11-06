@@ -1,0 +1,98 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: code-assistant-pool
+  namespace: default
+spec:
+  agentClassRef:
+    name: code-assistant
+  minReplicas: 2
+  maxReplicas: 20
+  prewarmPercent: 20
+  tokensPerSecondBudget: 1000
+  migProfile: "2g.10gb"
+  autoscaling:
+    metrics:
+      - type: tokens-in-queue
+        target: "100"
+        averagingWindow: 30s
+      - type: ttft-p95
+        target: "500ms"
+        averagingWindow: 1m
+      - type: concurrent-sessions
+        target: "50"
+    behavior:
+      scaleUp:
+        stabilizationWindow: 60s
+        maxChangePercent: 100
+        maxChangeAbsolute: 5
+        periodSeconds: 30
+      scaleDown:
+        stabilizationWindow: 300s
+        maxChangePercent: 50
+        maxChangeAbsolute: 2
+        periodSeconds: 60
+    cooldownPeriod: 5m
+  gpuRequirements:
+    count: 2
+    memory: "40Gi"
+    type: "A100"
+    topology:
+      locality: same-node
+      minBandwidth: 100Gi
+  sessionAffinity:
+    enabled: true
+    keyHeader: "X-Session-ID"
+    ttl: 1h
+    type: conversation-id
+  scheduling:
+    priority: 100
+    costOptimization:
+      enabled: true
+      maxCostPerHour: 50.0
+      spotEnabled: true
+      sloHeadroomMs: 1000
+      fallbackModel: llama-3-8b
+    dataLocality:
+      vectorStoreAffinity:
+        - code-embeddings-store
+      cacheAffinity:
+        - code-cache
+    nodeSelector:
+      node-type: gpu
+      gpu-model: a100
+---
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: chat-pool
+  namespace: default
+spec:
+  agentClassRef:
+    name: chat-assistant
+  minReplicas: 5
+  maxReplicas: 50
+  prewarmPercent: 30
+  tokensPerSecondBudget: 3000
+  migProfile: "1g.5gb"
+  autoscaling:
+    metrics:
+      - type: tokens-per-second
+        target: "100"
+      - type: concurrent-sessions
+        target: "100"
+    cooldownPeriod: 3m
+  gpuRequirements:
+    count: 1
+    memory: "20Gi"
+    type: "A100"
+  sessionAffinity:
+    enabled: true
+    type: user-id
+    ttl: 30m
+  scheduling:
+    priority: 50
+    costOptimization:
+      enabled: true
+      spotEnabled: true
+      sloHeadroomMs: 500

@@ -1,0 +1,86 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentClass
+metadata:
+  name: code-assistant
+  namespace: default
+spec:
+  modelRef:
+    name: llama-3-70b
+  maxContextLength: 128000
+  systemPrompt: |
+    You are an expert code assistant. Help users with code-related tasks,
+    including writing, debugging, and explaining code.
+  temperature: 0.7
+  maxTokens: 4096
+  toolPermissions:
+    - name: code-search
+      rateLimit: "100/min"
+      timeout: 10s
+      maxConcurrency: 5
+      requiredScopes:
+        - read:code
+    - name: file-read
+      rateLimit: "50/min"
+      timeout: 5s
+      maxConcurrency: 3
+      requiredScopes:
+        - read:file
+    - name: terminal-execute
+      rateLimit: "10/min"
+      timeout: 30s
+      maxConcurrency: 1
+      requiredScopes:
+        - execute:terminal
+  guardrails:
+    - type: pii-detection
+      action: redact
+      threshold: 0.8
+    - type: safety-check
+      action: block
+      threshold: 0.9
+    - type: jailbreak-detection
+      action: block
+      threshold: 0.85
+  slo:
+    ttft: 500ms
+    tokensPerSecond: 50
+    p95Latency: 2s
+    maxCostPerRequest: 0.10
+    availabilityPercent: 99.5
+  memoryConfig:
+    type: redis
+    ttl: 1h
+    maxSize: 10000
+    encrypted: true
+    connectionString: redis://redis-service:6379
+---
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentClass
+metadata:
+  name: chat-assistant
+  namespace: default
+spec:
+  modelRef:
+    name: llama-3-8b
+  maxContextLength: 8192
+  systemPrompt: |
+    You are a helpful, friendly assistant. Provide clear and concise answers.
+  temperature: 0.8
+  maxTokens: 2048
+  toolPermissions:
+    - name: web-search
+      rateLimit: "30/min"
+      timeout: 15s
+  guardrails:
+    - type: pii-detection
+      action: redact
+    - type: content-filter
+      action: block
+  slo:
+    ttft: 300ms
+    tokensPerSecond: 75
+    p95Latency: 1s
+  memoryConfig:
+    type: ephemeral
+    ttl: 30m
+    maxSize: 5000

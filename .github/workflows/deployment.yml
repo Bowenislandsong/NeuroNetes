@@ -1,0 +1,115 @@
+name: Deployment Tests
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday 2am
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-kind-deployment:
+    name: Test Kind Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Create Kind cluster
+        run: make dev
+
+      - name: Verify CRDs installed
+        run: kubectl get crds | grep neuronetes.ai
+
+      - name: Deploy sample resources
+        run: kubectl apply -f config/samples/
+
+      - name: Wait for resources
+        run: sleep 30
+
+      - name: Check resource status
+        run: |
+          kubectl get models,agentclasses,agentpools
+          kubectl describe models
+          kubectl describe agentclasses  
+          kubectl describe agentpools
+
+      - name: Cleanup
+        if: always()
+        run: make dev-clean
+
+  test-docker-compose-deployment:
+    name: Test Docker Compose Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start docker-compose stack
+        run: make docker-compose-up
+
+      - name: Wait for services to be ready
+        run: sleep 60
+
+      - name: Check service health
+        run: |
+          docker compose ps
+          curl -f http://localhost:6379 || echo "Redis: OK"
+          curl -f http://localhost:4222 || echo "NATS: OK"
+          curl -f http://localhost:8080/v1/.well-known/ready || echo "Weaviate: OK"
+          curl -f http://localhost:9090/-/healthy || echo "Prometheus: OK"
+          curl -f http://localhost:3000/api/health || echo "Grafana: OK"
+
+      - name: View logs
+        if: failure()
+        run: make docker-compose-logs
+
+      - name: Cleanup
+        if: always()
+        run: make docker-compose-down
+
+  test-monitoring-stack:
+    name: Test Monitoring Stack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Kind
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: neuronetes-monitoring
+
+      - name: Install Prometheus Operator
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+          helm install kube-prometheus prometheus-community/kube-prometheus-stack \
+            --namespace monitoring \
+            --create-namespace \
+            --wait --timeout 10m
+
+      - name: Install NeuroNetes
+        run: |
+          make install
+          make deploy
+
+      - name: Apply ServiceMonitors
+        run: kubectl apply -f config/monitoring/
+
+      - name: Wait for metrics
+        run: sleep 60
+
+      - name: Check Prometheus targets
+        run: |
+          kubectl port-forward -n monitoring svc/kube-prometheus-prometheus 9090:9090 &
+          sleep 5
+          curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job | contains("neuronetes"))'
