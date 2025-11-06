@@ -1,0 +1,44 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: Model
+metadata:
+  name: llama-3-70b
+  namespace: default
+spec:
+  weightsURI: s3://models/llama-3-70b/
+  size: 140Gi
+  quantization: int4
+  architecture: llama
+  parameterCount: "70B"
+  format: safetensors
+  shardSpec:
+    count: 4
+    strategy: tensor-parallel
+    topology:
+      locality: same-node
+      minBandwidth: 100Gi
+  cachePolicy:
+    priority: high
+    pinDuration: 1h
+    evictionPolicy: idle
+    preloadNodes:
+      - gpu-node-pool
+---
+apiVersion: neuronetes.io/v1alpha1
+kind: Model
+metadata:
+  name: llama-3-8b
+  namespace: default
+spec:
+  weightsURI: s3://models/llama-3-8b/
+  size: 16Gi
+  quantization: int8
+  architecture: llama
+  parameterCount: "8B"
+  format: safetensors
+  shardSpec:
+    count: 1
+    strategy: data-parallel
+  cachePolicy:
+    priority: medium
+    pinDuration: 30m
+    evictionPolicy: low-priority

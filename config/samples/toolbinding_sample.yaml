@@ -1,0 +1,99 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: ToolBinding
+metadata:
+  name: code-assistant-queue
+  namespace: default
+spec:
+  agentPoolRef:
+    name: code-assistant-pool
+  type: queue
+  queueConfig:
+    provider: nats
+    connectionString: nats://nats-server:4222
+    queueName: code-tasks
+    autoscaleOnLag: true
+    maxLagThreshold: 100
+    prefetchCount: 5
+    ackMode: manual
+  concurrency:
+    maxConcurrentRequests: 10
+    maxQueuedRequests: 50
+    perSessionLimit: 3
+  timeouts:
+    requestTimeout: 5m
+    toolTimeout: 30s
+    idleTimeout: 1m
+  retryPolicy:
+    maxAttempts: 3
+    initialBackoff: 1s
+    maxBackoff: 30s
+    backoffMultiplier: 2.0
+    retryableErrors:
+      - "timeout"
+      - "connection_error"
+      - "rate_limit"
+---
+apiVersion: neuronetes.io/v1alpha1
+kind: ToolBinding
+metadata:
+  name: chat-http
+  namespace: default
+spec:
+  agentPoolRef:
+    name: chat-pool
+  type: http
+  httpConfig:
+    path: /v1/chat/completions
+    methods:
+      - POST
+    rateLimitPerIP: "100/min"
+    streamingEnabled: true
+    corsConfig:
+      allowedOrigins:
+        - "*"
+      allowedMethods:
+        - POST
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      maxAge: 3600
+  concurrency:
+    maxConcurrentRequests: 100
+    maxQueuedRequests: 200
+    perSessionLimit: 5
+  timeouts:
+    requestTimeout: 2m
+    toolTimeout: 10s
+    idleTimeout: 30s
+  retryPolicy:
+    maxAttempts: 2
+    initialBackoff: 500ms
+    maxBackoff: 5s
+---
+apiVersion: neuronetes.io/v1alpha1
+kind: ToolBinding
+metadata:
+  name: rag-topic
+  namespace: default
+spec:
+  agentPoolRef:
+    name: code-assistant-pool
+  type: topic
+  topicConfig:
+    provider: kafka
+    connectionString: kafka-broker:9092
+    topicName: rag-queries
+    consumerGroup: rag-consumers
+    autoscaleOnLag: true
+  concurrency:
+    maxConcurrentRequests: 20
+    perSessionLimit: 2
+  timeouts:
+    requestTimeout: 3m
+    toolTimeout: 20s
+  retryPolicy:
+    maxAttempts: 5
+    initialBackoff: 2s
+    maxBackoff: 1m
+    backoffMultiplier: 2.5
