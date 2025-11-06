@@ -48,6 +48,29 @@ test:
 	@echo "Coverage report:"
 	$(GOCMD) tool cover -func=coverage.out
 
+## test-metrics: Run metrics tests
+test-metrics:
+	@echo "Running metrics tests..."
+	$(GOTEST) -v -race -coverprofile=metrics-coverage.out ./pkg/metrics/...
+
+## test-plugins: Run plugin tests
+test-plugins:
+	@echo "Running plugin tests..."
+	$(GOTEST) -v -race -coverprofile=plugins-coverage.out ./pkg/plugins/...
+
+## test-scheduler: Run scheduler tests
+test-scheduler:
+	@echo "Running scheduler tests..."
+	$(GOTEST) -v -race -coverprofile=scheduler-coverage.out ./pkg/scheduler/...
+
+## test-autoscaler: Run autoscaler tests
+test-autoscaler:
+	@echo "Running autoscaler tests..."
+	$(GOTEST) -v -race -coverprofile=autoscaler-coverage.out ./pkg/autoscaler/...
+
+## test-all: Run all tests
+test-all: test test-metrics test-plugins test-scheduler test-autoscaler test-integration test-e2e
+
 ## test-integration: Run integration tests
 test-integration:
 	@echo "Running integration tests..."

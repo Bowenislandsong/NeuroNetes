@@ -228,10 +228,50 @@ spec:
 - [Scheduler Guide](docs/scheduler.md) - GPU and token-aware scheduling
 - [Autoscaling Guide](docs/autoscaling.md) - Token-based autoscaling strategies
 - [Observability Guide](docs/observability.md) - Metrics, logging, and tracing
+- [Metrics Guide](docs/metrics.md) - 60+ agent-native metrics with Prometheus & Grafana
 - [Security Guide](docs/security.md) - Multi-tenancy and isolation
 - [Operations Guide](docs/operations.md) - Deployment and maintenance
 - [Local Development Guide](docs/local-development.md) - Docker & Kind setup
 - [Plugin Guide](docs/plugins.md) - Creating custom algorithms
+
+### Cloud Deployment
+
+- [AWS Deployment Guide](docs/cloud-deployment/aws.md) - Deploy on Amazon EKS
+- [GCP Deployment Guide](docs/cloud-deployment/gcp.md) - Deploy on Google GKE
+- [Azure Deployment Guide](docs/cloud-deployment/azure.md) - Deploy on Microsoft AKS
+- [Cloud Deployment Overview](docs/cloud-deployment/README.md) - Multi-cloud strategies
+
+## Metrics & Observability
+
+NeuroNetes provides **60+ specialized metrics** designed for LLM agent workloads:
+
+### Key Metric Categories
+
+- **UX & Quality**: TTFT P95, latency, RTF ratio, CSAT scores
+- **Token Economics**: Tokens/sec, cost per 1K tokens, context length
+- **GPU Efficiency**: GPU utilization, VRAM usage, MIG slice usage
+- **Tool Performance**: Tool call latency, success rate, RAG retrieval time
+- **Cost & Carbon**: $/session, spot savings, energy per 1K tokens
+
+### Ready-to-Use Dashboards
+
+```bash
+# Import Grafana dashboard
+kubectl create configmap neuronetes-dashboard \
+  --from-file=config/grafana/neuronetes-dashboard.json \
+  -n monitoring
+
+# Access at http://localhost:3000/d/neuronetes-agents
+```
+
+**Key Panels**:
+- Time to First Token (TTFT) with SLO alerts
+- Active sessions and queue depth
+- GPU utilization and VRAM usage
+- Cost per 1K tokens by model
+- Tool call latency P95
+
+See [Metrics Guide](docs/metrics.md) for complete documentation.
 
 ## Examples
 
@@ -284,15 +324,38 @@ make dev-clean
 # Build all components
 make build
 
-# Run tests
-make test
+# Run all tests
+make test-all
 
-# Run integration tests
-make test-integration
-
-# Run e2e tests
-make test-e2e
+# Run specific test suites
+make test              # Unit tests
+make test-metrics      # Metrics tests (95.7% coverage)
+make test-plugins      # Plugin framework tests
+make test-scheduler    # Scheduler tests
+make test-autoscaler   # Autoscaler tests
+make test-integration  # Integration tests
+make test-e2e          # End-to-end tests
 ```
+
+### Continuous Integration
+
+All code changes are automatically tested via GitHub Actions:
+
+**CI Pipeline** (`.github/workflows/ci.yml`):
+- ✅ Lint with golangci-lint
+- ✅ Unit tests with race detector
+- ✅ Integration tests with docker-compose
+- ✅ E2E tests with Kind cluster
+- ✅ Component-specific tests (metrics, plugins, scheduler, autoscaler)
+- ✅ Docker build
+- ✅ Code coverage upload to Codecov
+
+**Deployment Tests** (`.github/workflows/deployment.yml`):
+- ✅ Kind cluster deployment
+- ✅ Docker Compose stack validation
+- ✅ Monitoring stack integration
+
+See test results on [GitHub Actions](https://github.com/Bowenislandsong/NeuroNetes/actions).
 
 ### Developing Custom Plugins
 

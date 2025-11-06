@@ -1,0 +1,248 @@
+{
+  "dashboard": {
+    "title": "NeuroNetes Agent Metrics",
+    "uid": "neuronetes-agents",
+    "tags": ["neuronetes", "llm", "agents"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Time to First Token (TTFT) P95",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agent_ttft_ms_bucket[5m]))",
+            "legendFormat": "{{model}} - {{route}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "Latency"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [350],
+                "type": "gt"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "TTFT SLO Breach"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Tokens/Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_output_tokens_total[5m])",
+            "legendFormat": "{{model}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Active Sessions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "agent_active_sessions",
+            "legendFormat": "Sessions"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Queue Depth",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "agent_queue_depth",
+            "legendFormat": "{{route}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "GPU Utilization",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "gpu_util_pct",
+            "legendFormat": "{{node}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "max": 100
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "VRAM Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "gpu_vram_used_gb",
+            "legendFormat": "{{node}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "decgbytes"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Tool Call Latency P95",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agent_tool_latency_ms_bucket[5m]))",
+            "legendFormat": "{{tool}}"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_turn_errors_total[5m])",
+            "legendFormat": "Errors"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Cost per 1K Tokens",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "cost_usd_per_1k_tokens",
+            "legendFormat": "{{model}}"
+          }
+        ],
+        "format": "currencyUSD"
+      },
+      {
+        "id": 10,
+        "title": "Model Load Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(model_load_time_seconds_bucket[5m]))",
+            "legendFormat": "{{model}}"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Cache Hit Ratio",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "model_cache_hit_ratio",
+            "legendFormat": "Model Cache"
+          },
+          {
+            "expr": "rag_retrieval_cache_hit_ratio",
+            "legendFormat": "RAG Cache"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Autoscaling Events",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(hpa_decisions_total[5m])",
+            "legendFormat": "{{reason}}"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Policy Blocks & Redactions",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(policy_blocks_total[5m])",
+            "legendFormat": "Blocks"
+          },
+          {
+            "expr": "rate(redaction_events_total[5m])",
+            "legendFormat": "Redactions"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Spot Savings",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "sum(increase(spot_savings_usd_total[24h]))",
+            "legendFormat": "24h Savings"
+          }
+        ],
+        "format": "currencyUSD"
+      },
+      {
+        "id": 15,
+        "title": "Token Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_input_tokens_total[5m])",
+            "legendFormat": "Input"
+          },
+          {
+            "expr": "rate(agent_output_tokens_total[5m])",
+            "legendFormat": "Output"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "RAG Retrieval Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(rag_retrieval_latency_ms_bucket[5m]))",
+            "legendFormat": "P95"
+          }
+        ]
+      }
+    ]
+  }
+}
