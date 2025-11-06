@@ -211,11 +211,11 @@ func validateToolPermission(tp *neuronetes.ToolPermission) error {
 
 func validateGuardrail(g *neuronetes.Guardrail) error {
 	validTypes := map[string]bool{
-		"pii-detection":      true,
-		"safety-check":       true,
-		"content-filter":     true,
+		"pii-detection":       true,
+		"safety-check":        true,
+		"content-filter":      true,
 		"jailbreak-detection": true,
-		"prompt-injection":   true,
+		"prompt-injection":    true,
 	}
 	if !validTypes[g.Type] {
 		return assert.AnError

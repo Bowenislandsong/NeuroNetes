@@ -30,39 +30,39 @@ import (
 // AgentMetrics defines all agent-native metrics for NeuroNetes
 type AgentMetrics struct {
 	// UX & Quality (SLO-facing)
-	TTFTHistogram        prometheus.Histogram
-	LatencyHistogram     prometheus.Histogram
-	RTFRatio             prometheus.Gauge
-	TokensOutRate        prometheus.Gauge
-	CSATScore            prometheus.Gauge
-	ThumbsUpRate         prometheus.Gauge
-	TurnErrorRate        prometheus.Counter
-	QualityWinRate       prometheus.Gauge
+	TTFTHistogram    prometheus.Histogram
+	LatencyHistogram prometheus.Histogram
+	RTFRatio         prometheus.Gauge
+	TokensOutRate    prometheus.Gauge
+	CSATScore        prometheus.Gauge
+	ThumbsUpRate     prometheus.Gauge
+	TurnErrorRate    prometheus.Counter
+	QualityWinRate   prometheus.Gauge
 
 	// Load & Concurrency
-	ActiveSessions     prometheus.Gauge
-	QueueDepth         prometheus.Gauge
-	AdmissionRejects   prometheus.Counter
-	ScalingLag         prometheus.Histogram
+	ActiveSessions   prometheus.Gauge
+	QueueDepth       prometheus.Gauge
+	AdmissionRejects prometheus.Counter
+	ScalingLag       prometheus.Histogram
 
 	// Token & Context Dynamics
-	InputTokens         prometheus.Counter
-	OutputTokens        prometheus.Counter
-	TotalTokens         prometheus.Counter
-	ContextLengthP95    prometheus.Gauge
-	ContextTruncations  prometheus.Counter
-	KVCacheHitRatio     prometheus.Gauge
+	InputTokens          prometheus.Counter
+	OutputTokens         prometheus.Counter
+	TotalTokens          prometheus.Counter
+	ContextLengthP95     prometheus.Gauge
+	ContextTruncations   prometheus.Counter
+	KVCacheHitRatio      prometheus.Gauge
 	BatchMergeEfficiency prometheus.Gauge
 
 	// Tooling / Function Calls
-	ToolCallsPerTurn    prometheus.Histogram
-	ToolLatency         prometheus.Histogram
-	ToolSuccessRate     prometheus.Gauge
-	ToolTimeoutRate     prometheus.Gauge
-	ToolRetryRate       prometheus.Gauge
-	RetrievalLatency    prometheus.Histogram
-	RetrievalCacheHit   prometheus.Gauge
-	GroundingCoverage   prometheus.Gauge
+	ToolCallsPerTurn  prometheus.Histogram
+	ToolLatency       prometheus.Histogram
+	ToolSuccessRate   prometheus.Gauge
+	ToolTimeoutRate   prometheus.Gauge
+	ToolRetryRate     prometheus.Gauge
+	RetrievalLatency  prometheus.Histogram
+	RetrievalCacheHit prometheus.Gauge
+	GroundingCoverage prometheus.Gauge
 
 	// RAG Quality
 	RetrievalHitAtK      prometheus.Gauge
@@ -71,42 +71,42 @@ type AgentMetrics struct {
 	CitationValidityRate prometheus.Gauge
 
 	// GPU & System Efficiency
-	GPUUtilization        prometheus.Gauge
-	SMUtilization         prometheus.Gauge
-	MemoryBWUtilization   prometheus.Gauge
-	VRAMUsed              prometheus.Gauge
-	VRAMFragmentation     prometheus.Gauge
-	MIGSliceUtilization   prometheus.Gauge
-	NodeModelCacheHit     prometheus.Gauge
-	ModelLoadTime         prometheus.Histogram
-	SnapshotRestoreTime   prometheus.Histogram
-	ColdStartRate         prometheus.Gauge
+	GPUUtilization      prometheus.Gauge
+	SMUtilization       prometheus.Gauge
+	MemoryBWUtilization prometheus.Gauge
+	VRAMUsed            prometheus.Gauge
+	VRAMFragmentation   prometheus.Gauge
+	MIGSliceUtilization prometheus.Gauge
+	NodeModelCacheHit   prometheus.Gauge
+	ModelLoadTime       prometheus.Histogram
+	SnapshotRestoreTime prometheus.Histogram
+	ColdStartRate       prometheus.Gauge
 
 	// Network & Streaming
-	StreamInitLatency      prometheus.Histogram
-	StreamBackpressure     prometheus.Counter
-	StreamDropRate         prometheus.Gauge
-	StreamCancelRate       prometheus.Gauge
-	TokenDeliveryJitter    prometheus.Histogram
+	StreamInitLatency   prometheus.Histogram
+	StreamBackpressure  prometheus.Counter
+	StreamDropRate      prometheus.Gauge
+	StreamCancelRate    prometheus.Gauge
+	TokenDeliveryJitter prometheus.Histogram
 
 	// Scheduler & Placement
-	GangScheduleWait      prometheus.Histogram
-	TopologyPenaltyScore  prometheus.Gauge
+	GangScheduleWait       prometheus.Histogram
+	TopologyPenaltyScore   prometheus.Gauge
 	SessionAffinityHitRate prometheus.Gauge
-	DataLocalityRate      prometheus.Gauge
+	DataLocalityRate       prometheus.Gauge
 
 	// Autoscaling & Reliability
-	HPADecisions          prometheus.Counter
-	ReplicaPreemptions    prometheus.Counter
-	ReplicaEvictions      prometheus.Counter
-	SpotInterruptions     prometheus.Counter
-	FailoverTime          prometheus.Histogram
-	ErrorBudgetBurnRate   prometheus.Gauge
+	HPADecisions        prometheus.Counter
+	ReplicaPreemptions  prometheus.Counter
+	ReplicaEvictions    prometheus.Counter
+	SpotInterruptions   prometheus.Counter
+	FailoverTime        prometheus.Histogram
+	ErrorBudgetBurnRate prometheus.Gauge
 
 	// Security, Safety, Policy
-	PolicyBlocks     prometheus.Counter
-	RedactionEvents  prometheus.Counter
-	AuthzDenials     prometheus.Counter
+	PolicyBlocks    prometheus.Counter
+	RedactionEvents prometheus.Counter
+	AuthzDenials    prometheus.Counter
 
 	// Cost & Carbon
 	CostPer1KTokens      prometheus.Gauge

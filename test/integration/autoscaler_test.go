@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	neuronetes "github.com/bowenislandsong/neuronetes/api/v1alpha1"
 	"github.com/bowenislandsong/neuronetes/pkg/autoscaler"
@@ -196,7 +196,7 @@ func TestAutoscalerIntegration(t *testing.T) {
 		// Evaluate
 		decision, err := scaler.Evaluate(ctx, pool)
 		require.NoError(t, err)
-		
+
 		// Should not exceed max change
 		assert.LessOrEqual(t, decision.DesiredReplicas-decision.CurrentReplicas, maxChange)
 	})

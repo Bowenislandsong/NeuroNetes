@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -91,7 +91,7 @@ func (r *ModelReconciler) reconcileLoading(ctx context.Context, model *neuronete
 		model.Status.Phase = "Ready"
 		loadTime := 30 * time.Second // Replace with actual measurement
 		model.Status.LoadTime = &metav1.Duration{Duration: loadTime}
-		
+
 		if err := r.Status().Update(ctx, model); err != nil {
 			return ctrl.Result{}, err
 		}

@@ -39,16 +39,16 @@ func (p *ExampleSchedulerPlugin) Filter(ctx context.Context, pod *corev1.Pod, no
 func (p *ExampleSchedulerPlugin) Score(ctx context.Context, pod *corev1.Pod, node *corev1.Node, pool *neuronetes.AgentPool) int64 {
 	// Example: Score based on available resources
 	var score int64 = 50 // Base score
-	
+
 	// Bonus for nodes with specific labels
 	if _, ok := node.Labels["neuronetes.io/gpu-type"]; ok {
 		score += 20
 	}
-	
+
 	if _, ok := node.Labels["neuronetes.io/high-bandwidth"]; ok {
 		score += 15
 	}
-	
+
 	return score
 }
 
@@ -78,17 +78,17 @@ func (p *ExampleAutoscalerPlugin) CalculateReplicas(ctx context.Context, pool *n
 	if !ok {
 		return pool.Status.Replicas, nil
 	}
-	
+
 	// Simple scaling logic
 	targetLoad := 70.0
 	currentReplicas := float64(pool.Status.Replicas)
-	
+
 	if currentReplicas == 0 {
 		return pool.Spec.MinReplicas, nil
 	}
-	
+
 	desiredReplicas := int32(currentReplicas * (customMetric / targetLoad))
-	
+
 	// Apply bounds
 	if desiredReplicas < pool.Spec.MinReplicas {
 		desiredReplicas = pool.Spec.MinReplicas
@@ -96,7 +96,7 @@ func (p *ExampleAutoscalerPlugin) CalculateReplicas(ctx context.Context, pool *n
 	if desiredReplicas > pool.Spec.MaxReplicas {
 		desiredReplicas = pool.Spec.MaxReplicas
 	}
-	
+
 	return desiredReplicas, nil
 }
 
@@ -166,7 +166,7 @@ func (p *ExampleGuardrailPlugin) Name() string {
 func (p *ExampleGuardrailPlugin) Check(ctx context.Context, request *GuardrailRequest) (*GuardrailResult, error) {
 	// Example: Simple keyword-based guardrail
 	blockedKeywords := []string{"forbidden", "blocked"}
-	
+
 	for _, keyword := range blockedKeywords {
 		if contains(request.Content, keyword) {
 			return &GuardrailResult{
@@ -177,7 +177,7 @@ func (p *ExampleGuardrailPlugin) Check(ctx context.Context, request *GuardrailRe
 			}, nil
 		}
 	}
-	
+
 	return &GuardrailResult{
 		Passed:     true,
 		Action:     "allow",

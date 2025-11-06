@@ -36,10 +36,10 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	setupLog.Info("starting GPU topology scheduler")
-	
+
 	// Scheduler implementation would go here
 	// This is a skeleton for the build
-	
+
 	setupLog.Info("scheduler running")
 	select {}
 }

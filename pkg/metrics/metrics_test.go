@@ -89,10 +89,10 @@ func TestRecordTokens(t *testing.T) {
 	metrics := NewAgentMetrics(registry)
 
 	tests := []struct {
-		name         string
-		inputTokens  int64
-		outputTokens int64
-		model        string
+		name          string
+		inputTokens   int64
+		outputTokens  int64
+		model         string
 		expectedTotal int64
 	}{
 		{
@@ -168,11 +168,11 @@ func TestRecordCost(t *testing.T) {
 	metrics := NewAgentMetrics(registry)
 
 	tests := []struct {
-		name            string
-		costUSD         float64
-		tokens          int64
-		model           string
-		tenant          string
+		name              string
+		costUSD           float64
+		tokens            int64
+		model             string
+		tenant            string
 		expectedCostPer1K float64
 	}{
 		{
@@ -233,11 +233,11 @@ func TestRecordGPUMetrics(t *testing.T) {
 	metrics := NewAgentMetrics(registry)
 
 	tests := []struct {
-		name       string
-		node       string
-		gpuUtil    float64
-		vramUsed   float64
-		vramTotal  float64
+		name         string
+		node         string
+		gpuUtil      float64
+		vramUsed     float64
+		vramTotal    float64
 		expectedFrag float64
 	}{
 		{

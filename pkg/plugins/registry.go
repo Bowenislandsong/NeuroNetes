@@ -81,39 +81,39 @@ type GuardrailPlugin interface {
 
 // GuardrailRequest represents a request to evaluate
 type GuardrailRequest struct {
-	Content     string
-	Metadata    map[string]string
-	AgentClass  string
-	SessionID   string
-	RequestID   string
+	Content    string
+	Metadata   map[string]string
+	AgentClass string
+	SessionID  string
+	RequestID  string
 }
 
 // GuardrailResult represents the result of a guardrail check
 type GuardrailResult struct {
-	Passed    bool
-	Action    string // block, redact, warn, log
-	Reason    string
+	Passed     bool
+	Action     string // block, redact, warn, log
+	Reason     string
 	Confidence float64
-	Metadata  map[string]string
+	Metadata   map[string]string
 }
 
 // PluginRegistry manages all plugins
 type PluginRegistry struct {
-	schedulers      []SchedulerPlugin
-	autoscalers     []AutoscalerPlugin
-	modelLoaders    []ModelLoaderPlugin
+	schedulers       []SchedulerPlugin
+	autoscalers      []AutoscalerPlugin
+	modelLoaders     []ModelLoaderPlugin
 	metricsProviders []MetricsProviderPlugin
-	guardrails      []GuardrailPlugin
+	guardrails       []GuardrailPlugin
 }
 
 // NewPluginRegistry creates a new plugin registry
 func NewPluginRegistry() *PluginRegistry {
 	return &PluginRegistry{
-		schedulers:      make([]SchedulerPlugin, 0),
-		autoscalers:     make([]AutoscalerPlugin, 0),
-		modelLoaders:    make([]ModelLoaderPlugin, 0),
+		schedulers:       make([]SchedulerPlugin, 0),
+		autoscalers:      make([]AutoscalerPlugin, 0),
+		modelLoaders:     make([]ModelLoaderPlugin, 0),
 		metricsProviders: make([]MetricsProviderPlugin, 0),
-		guardrails:      make([]GuardrailPlugin, 0),
+		guardrails:       make([]GuardrailPlugin, 0),
 	}
 }
 

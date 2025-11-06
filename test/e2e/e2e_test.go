@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -22,7 +22,7 @@ func TestE2EModelLifecycle(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// Setup Kubernetes client
 	config, err := clientcmd.BuildConfigFromFlags("", "")
 	if err != nil {
@@ -62,12 +62,12 @@ func TestE2EModelLifecycle(t *testing.T) {
 		// Simulate waiting for model to be ready
 		// In production, this would poll the API
 		time.Sleep(100 * time.Millisecond)
-		
+
 		// Mock status check
 		status := neuronetes.ModelStatus{
 			Phase: "Ready",
 		}
-		
+
 		assert.Equal(t, "Ready", status.Phase)
 	})
 }
@@ -103,13 +103,13 @@ func TestE2EAgentPoolScaling(t *testing.T) {
 	t.Run("pool scales on load", func(t *testing.T) {
 		// Simulate load increase
 		time.Sleep(100 * time.Millisecond)
-		
+
 		// Mock scaled status
 		status := neuronetes.AgentPoolStatus{
 			Replicas:      3,
 			ReadyReplicas: 3,
 		}
-		
+
 		assert.GreaterOrEqual(t, status.Replicas, int32(1))
 		assert.LessOrEqual(t, status.Replicas, int32(5))
 	})
@@ -252,7 +252,7 @@ func TestE2ECompleteWorkflow(t *testing.T) {
 	t.Run("verify system stability", func(t *testing.T) {
 		// Simulate running for a period
 		time.Sleep(200 * time.Millisecond)
-		
+
 		// Check that system remains stable
 		assert.True(t, true, "System should remain stable")
 	})
@@ -267,7 +267,7 @@ func TestE2ECleanup(t *testing.T) {
 	t.Run("cleanup resources", func(t *testing.T) {
 		// In production, this would delete resources via API
 		// and verify they're properly cleaned up
-		
+
 		// Mock cleanup verification
 		assert.True(t, true, "Resources should be cleaned up")
 	})

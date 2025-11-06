@@ -264,7 +264,7 @@ func (s *GPUTopologyScheduler) scoreCostEfficiency(node *corev1.Node, agentPool 
 	}
 
 	// Check if spot instance
-	instanceType, ok := node.Labels["node.kubernetes.io/instance-type"]
+	_, ok := node.Labels["node.kubernetes.io/instance-type"]
 	if !ok {
 		return 0.5
 	}

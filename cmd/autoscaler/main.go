@@ -36,10 +36,10 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	setupLog.Info("starting token-aware autoscaler")
-	
+
 	// Autoscaler implementation would go here
 	// This is a skeleton for the build
-	
+
 	setupLog.Info("autoscaler running")
 	select {}
 }
