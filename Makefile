@@ -125,6 +125,7 @@ generate:
 manifests: generate
 	@echo "Generating manifests..."
 	$(CONTROLLER_GEN) crd:allowDangerousTypes=true,crdVersions=v1 paths="./api/..." output:crd:artifacts:config=config/crd
+	@mkdir -p config/deploy
 	kustomize build config/default > config/deploy/neuronetes.yaml
 
 ## install: Install CRDs into the cluster
