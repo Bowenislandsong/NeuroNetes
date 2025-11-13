@@ -1,0 +1,336 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: neuronetes-slo-alerts
+  namespace: monitoring
+  labels:
+    app: neuronetes
+    prometheus: kube-prometheus
+spec:
+  groups:
+  - name: neuronetes_slo_alerts
+    interval: 30s
+    rules:
+    # UX & Quality SLO Alerts
+    - alert: TTFTSLOBreach
+      expr: histogram_quantile(0.95, rate(agent_ttft_ms_bucket[5m])) > 350
+      for: 5m
+      labels:
+        severity: warning
+        category: ux
+      annotations:
+        summary: "TTFT P95 exceeds 350ms SLO"
+        description: "Time to first token P95 is {{ $value }}ms, above the 350ms SLO threshold for {{ $labels.model }} on {{ $labels.route }}"
+
+    - alert: LatencySLOBreach
+      expr: histogram_quantile(0.95, rate(agent_latency_ms_bucket[5m])) > 2500
+      for: 5m
+      labels:
+        severity: warning
+        category: ux
+      annotations:
+        summary: "Turn latency P95 exceeds 2.5s SLO"
+        description: "End-to-end latency P95 is {{ $value }}ms, above the 2500ms SLO threshold"
+
+    - alert: HighErrorRate
+      expr: rate(agent_turn_errors_total[5m]) / (rate(agent_latency_ms_count[5m]) + 1) > 0.01
+      for: 5m
+      labels:
+        severity: critical
+        category: reliability
+      annotations:
+        summary: "Turn error rate exceeds 1% SLO"
+        description: "Error rate is {{ $value | humanizePercentage }}, above the 1% SLO threshold"
+
+    - alert: LowQualityWinRate
+      expr: agent_quality_winrate < 0.50
+      for: 15m
+      labels:
+        severity: warning
+        category: quality
+      annotations:
+        summary: "Canary quality win rate below 50%"
+        description: "Quality win rate is {{ $value | humanizePercentage }}, indicating potential regression"
+
+    - alert: HighRTFRatio
+      expr: agent_rtf_ratio > 1.5
+      for: 10m
+      labels:
+        severity: warning
+        category: performance
+      annotations:
+        summary: "RTF ratio exceeds 1.5 threshold"
+        description: "Real-time factor is {{ $value }}, generation is slower than real-time playback"
+
+    # Tooling & RAG Alerts
+    - alert: ToolLatencySLOBreach
+      expr: histogram_quantile(0.95, rate(agent_tool_latency_ms_bucket[5m])) > 800
+      for: 5m
+      labels:
+        severity: warning
+        category: tools
+      annotations:
+        summary: "Tool call P95 latency exceeds 800ms SLO"
+        description: "Tool {{ $labels.tool }} P95 latency is {{ $value }}ms, above the 800ms SLO threshold"
+
+    - alert: LowToolSuccessRate
+      expr: agent_tool_success_rate < 0.95
+      for: 10m
+      labels:
+        severity: warning
+        category: tools
+      annotations:
+        summary: "Tool success rate below 95%"
+        description: "Tool {{ $labels.tool }} success rate is {{ $value | humanizePercentage }}"
+
+    - alert: HighHallucinationRate
+      expr: agent_hallucination_rate > 0.05
+      for: 15m
+      labels:
+        severity: warning
+        category: quality
+      annotations:
+        summary: "Hallucination rate exceeds 5%"
+        description: "Hallucination proxy rate is {{ $value | humanizePercentage }}"
+
+    - alert: LowRetrievalCacheHitRatio
+      expr: rag_retrieval_cache_hit_ratio < 0.50
+      for: 20m
+      labels:
+        severity: info
+        category: performance
+      annotations:
+        summary: "RAG retrieval cache hit ratio below 50%"
+        description: "Cache hit ratio is {{ $value | humanizePercentage }}, consider cache warming"
+
+    # Load & Concurrency Alerts
+    - alert: HighQueueDepth
+      expr: agent_queue_depth > 100
+      for: 5m
+      labels:
+        severity: warning
+        category: capacity
+      annotations:
+        summary: "Queue depth exceeds 100 requests"
+        description: "Queue depth is {{ $value }} for {{ $labels.route }}"
+
+    - alert: HighAdmissionRejectRate
+      expr: rate(agent_admission_rejects_total[5m]) > 1
+      for: 5m
+      labels:
+        severity: warning
+        category: capacity
+      annotations:
+        summary: "High admission rejection rate"
+        description: "Rejecting {{ $value }} requests/sec due to capacity or SLO constraints"
+
+    - alert: SlowScaling
+      expr: histogram_quantile(0.95, rate(agent_scaling_lag_seconds_bucket[10m])) > 60
+      for: 10m
+      labels:
+        severity: warning
+        category: autoscaling
+      annotations:
+        summary: "Autoscaling lag exceeds 60s"
+        description: "P95 scaling lag is {{ $value }}s, pods are slow to become ready"
+
+    # GPU & System Efficiency Alerts
+    - alert: LowGPUUtilization
+      expr: gpu_util_pct < 50
+      for: 30m
+      labels:
+        severity: info
+        category: efficiency
+      annotations:
+        summary: "GPU utilization below 50%"
+        description: "GPU on {{ $labels.node }} is at {{ $value }}% utilization"
+
+    - alert: HighGPUUtilization
+      expr: gpu_util_pct > 95
+      for: 10m
+      labels:
+        severity: warning
+        category: capacity
+      annotations:
+        summary: "GPU utilization above 95%"
+        description: "GPU on {{ $labels.node }} is at {{ $value }}% utilization, may cause throttling"
+
+    - alert: HighVRAMUsage
+      expr: (gpu_vram_used_gb / (gpu_vram_used_gb + (gpu_vram_frag_pct / 100 * gpu_vram_used_gb))) > 0.90
+      for: 10m
+      labels:
+        severity: warning
+        category: capacity
+      annotations:
+        summary: "VRAM usage above 90%"
+        description: "VRAM on {{ $labels.node }} is {{ $value | humanizePercentage }} full"
+
+    - alert: HighColdStartRate
+      expr: agent_cold_start_rate > 0.02
+      for: 15m
+      labels:
+        severity: warning
+        category: performance
+      annotations:
+        summary: "Cold start rate exceeds 2% SLO"
+        description: "{{ $value | humanizePercentage }} of turns are cold starts"
+
+    - alert: LowModelCacheHitRatio
+      expr: model_cache_hit_ratio < 0.80
+      for: 20m
+      labels:
+        severity: info
+        category: efficiency
+      annotations:
+        summary: "Model cache hit ratio below 80%"
+        description: "Cache hit ratio is {{ $value | humanizePercentage }}, models frequently loading from storage"
+
+    # Cost & Budget Alerts
+    - alert: HighCostPer1KTokens
+      expr: cost_usd_per_1k_tokens > 0.10
+      for: 15m
+      labels:
+        severity: warning
+        category: cost
+      annotations:
+        summary: "Cost per 1K tokens exceeds $0.10"
+        description: "Cost is ${{ $value }} per 1K tokens for {{ $labels.model }}/{{ $labels.tenant }}"
+
+    - alert: ErrorBudgetBurnRateHigh
+      expr: error_budget_burn_rate > 1.0
+      for: 5m
+      labels:
+        severity: critical
+        category: slo
+      annotations:
+        summary: "Error budget burning faster than sustainable rate"
+        description: "Error budget burn rate is {{ $value }}, will exhaust budget before period end"
+
+    # Security & Policy Alerts
+    - alert: HighPolicyBlockRate
+      expr: rate(policy_blocks_total[5m]) > 5
+      for: 10m
+      labels:
+        severity: warning
+        category: security
+      annotations:
+        summary: "High rate of policy blocks"
+        description: "{{ $value }} policy blocks/sec for {{ $labels.type }}"
+
+    - alert: HighAuthzDenialRate
+      expr: rate(authz_denials_total[5m]) > 1
+      for: 10m
+      labels:
+        severity: warning
+        category: security
+      annotations:
+        summary: "High authorization denial rate"
+        description: "{{ $value }} authz denials/sec, check tool permissions"
+
+    # Reliability Alerts
+    - alert: HighReplicaEvictionRate
+      expr: rate(replica_evictions_total[10m]) > 0.5
+      for: 10m
+      labels:
+        severity: warning
+        category: reliability
+      annotations:
+        summary: "High replica eviction rate"
+        description: "{{ $value }} replicas/min being evicted"
+
+    - alert: FrequentSpotInterruptions
+      expr: rate(spot_interruptions_total[1h]) > 2
+      for: 30m
+      labels:
+        severity: warning
+        category: reliability
+      annotations:
+        summary: "Frequent spot instance interruptions"
+        description: "{{ $value }} spot interruptions in the last hour"
+
+    # Streaming & Network Alerts
+    - alert: HighStreamBackpressure
+      expr: rate(stream_backpressure_events_total[5m]) > 10
+      for: 5m
+      labels:
+        severity: warning
+        category: streaming
+      annotations:
+        summary: "High stream backpressure events"
+        description: "{{ $value }} backpressure events/sec, clients may be slow"
+
+    - alert: HighStreamDropRate
+      expr: stream_drop_rate > 0.01
+      for: 10m
+      labels:
+        severity: critical
+        category: streaming
+      annotations:
+        summary: "Stream drop rate exceeds 1%"
+        description: "{{ $value | humanizePercentage }} of streams are being dropped"
+
+  # Recording Rules for Efficient Queries
+  - name: neuronetes_recording_rules
+    interval: 30s
+    rules:
+    # Aggregate token metrics
+    - record: neuronetes:tokens_per_second:rate5m
+      expr: rate(agent_total_tokens[5m])
+
+    - record: neuronetes:tokens_per_request:avg5m
+      expr: rate(agent_total_tokens[5m]) / (rate(agent_latency_ms_count[5m]) + 1)
+
+    # Cost efficiency
+    - record: neuronetes:cost_efficiency:usd_per_token
+      expr: cost_usd_per_1k_tokens / 1000
+
+    - record: neuronetes:gpu_cost_per_hour:by_node
+      expr: rate(gpu_hours_total[1h])
+
+    # GPU efficiency
+    - record: neuronetes:tokens_per_gpu_second:rate5m
+      expr: rate(agent_total_tokens[5m]) / (gpu_util_pct / 100 + 0.01)
+
+    - record: neuronetes:vram_efficiency:pct
+      expr: (gpu_vram_used_gb / (gpu_vram_used_gb + (gpu_vram_frag_pct / 100 * gpu_vram_used_gb))) * 100
+
+    # SLO compliance
+    - record: neuronetes:ttft_slo_compliance:rate5m
+      expr: (1 - (count(histogram_quantile(0.95, rate(agent_ttft_ms_bucket[5m])) > 350) or vector(0)) / (count(rate(agent_ttft_ms_count[5m]) > 0) or vector(1)))
+
+    - record: neuronetes:latency_slo_compliance:rate5m
+      expr: (1 - (count(histogram_quantile(0.95, rate(agent_latency_ms_bucket[5m])) > 2500) or vector(0)) / (count(rate(agent_latency_ms_count[5m]) > 0) or vector(1)))
+
+    - record: neuronetes:error_rate:rate5m
+      expr: rate(agent_turn_errors_total[5m]) / (rate(agent_latency_ms_count[5m]) + 1)
+
+    # Capacity planning
+    - record: neuronetes:request_rate:rate5m
+      expr: rate(agent_latency_ms_count[5m])
+
+    - record: neuronetes:avg_active_sessions:5m
+      expr: avg_over_time(agent_active_sessions[5m])
+
+    - record: neuronetes:peak_queue_depth:5m
+      expr: max_over_time(agent_queue_depth[5m])
+
+    # Tool performance
+    - record: neuronetes:tool_latency_p95:rate5m
+      expr: histogram_quantile(0.95, rate(agent_tool_latency_ms_bucket[5m]))
+
+    - record: neuronetes:tool_calls_per_turn:avg5m
+      expr: rate(agent_tool_latency_ms_count[5m]) / (rate(agent_latency_ms_count[5m]) + 1)
+
+    # Context efficiency
+    - record: neuronetes:kv_cache_efficiency:avg5m
+      expr: avg_over_time(agent_kv_cache_hit_ratio[5m])
+
+    - record: neuronetes:batch_efficiency:avg5m
+      expr: avg_over_time(agent_batch_merge_efficiency[5m])
+
+    # Carbon & energy
+    - record: neuronetes:energy_per_request:kwh
+      expr: energy_kwh_per_1k_tokens * (rate(agent_total_tokens[5m]) / rate(agent_latency_ms_count[5m]) + 1) / 1000
+
+    - record: neuronetes:spot_savings_rate:usd_per_hour
+      expr: rate(spot_savings_usd_total[1h])
