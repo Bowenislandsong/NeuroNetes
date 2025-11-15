@@ -2,7 +2,11 @@
   "dashboard": {
     "title": "NeuroNetes Agent Metrics",
     "uid": "neuronetes-agents",
-    "tags": ["neuronetes", "llm", "agents"],
+    "tags": [
+      "neuronetes",
+      "llm",
+      "agents"
+    ],
     "timezone": "browser",
     "schemaVersion": 38,
     "refresh": "30s",
@@ -31,11 +35,17 @@
           "conditions": [
             {
               "evaluator": {
-                "params": [350],
+                "params": [
+                  350
+                ],
                 "type": "gt"
               },
               "query": {
-                "params": ["A", "5m", "now"]
+                "params": [
+                  "A",
+                  "5m",
+                  "now"
+                ]
               },
               "reducer": {
                 "params": [],
@@ -240,6 +250,23 @@
           {
             "expr": "histogram_quantile(0.95, rate(rag_retrieval_latency_ms_bucket[5m]))",
             "legendFormat": "P95"
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Turn Latency P95",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agent_latency_ms_bucket[5m]))",
+            "legendFormat": "{{model}} - {{route}}"
           }
         ]
       }
