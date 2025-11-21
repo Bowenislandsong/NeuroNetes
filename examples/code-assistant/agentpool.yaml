@@ -1,0 +1,52 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: code-assistant-pool
+  namespace: default
+spec:
+  agentClassRef:
+    name: code-assistant
+  
+  minReplicas: 2
+  maxReplicas: 10
+  prewarmPercent: 25
+  
+  autoscaling:
+    metrics:
+      - type: concurrent-sessions
+        target: "30"
+      - type: ttft-p95
+        target: "500ms"
+      - type: tool-call-rate
+        target: "10"
+    
+    behavior:
+      scaleUp:
+        stabilizationWindow: 45s
+        maxChangeAbsolute: 3
+      scaleDown:
+        stabilizationWindow: 300s
+        maxChangeAbsolute: 1
+  
+  gpuRequirements:
+    count: 2
+    memory: "40Gi"
+    type: "A100"
+  
+  sessionAffinity:
+    enabled: true
+    keyHeader: "X-Session-ID"
+    ttl: 1h
+    type: conversation-id
+  
+  scheduling:
+    priority: 85
+    
+    costOptimization:
+      enabled: true
+      spotEnabled: true
+      sloHeadroomMs: 1000
+    
+    nodeSelector:
+      node-type: gpu
+      workload: ai-agent

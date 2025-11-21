@@ -384,12 +384,14 @@ spec:
 ### Monitoring & Alerts
 
 **CloudWatch Integration**:
+{% raw %}
 ```bash
 # Install CloudWatch Container Insights
 curl https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/quickstart/cwagent-fluentd-quickstart.yaml | \
   sed "s/{{cluster_name}}/$CLUSTER_NAME/;s/{{region_name}}/$REGION/" | \
   kubectl apply -f -
 ```
+{% endraw %}
 
 **Custom Metrics**:
 ```yaml

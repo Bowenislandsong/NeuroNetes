@@ -1,0 +1,46 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: chat-pool
+  namespace: default
+spec:
+  agentClassRef:
+    name: chat-assistant
+  
+  minReplicas: 3
+  maxReplicas: 30
+  prewarmPercent: 30
+  
+  migProfile: "1g.5gb"
+  
+  autoscaling:
+    metrics:
+      - type: concurrent-sessions
+        target: "100"
+      - type: ttft-p95
+        target: "300ms"
+    
+    behavior:
+      scaleUp:
+        stabilizationWindow: 30s
+        maxChangeAbsolute: 5
+      scaleDown:
+        stabilizationWindow: 180s
+        maxChangeAbsolute: 2
+  
+  gpuRequirements:
+    count: 1
+    memory: "20Gi"
+    type: "A100"
+  
+  sessionAffinity:
+    enabled: true
+    keyHeader: "X-Session-ID"
+    ttl: 30m
+    type: conversation-id
+  
+  scheduling:
+    costOptimization:
+      enabled: true
+      spotEnabled: true
+      maxCostPerHour: 30.0

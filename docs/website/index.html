@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroNetes - Agent-Native Kubernetes Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .hero .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .cta-buttons {
+            margin-top: 30px;
+        }
+
+        .cta-buttons a {
+            display: inline-block;
+            padding: 15px 40px;
+            margin: 0 10px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-buttons a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .cta-buttons a.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            background: #2d3748;
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #667eea;
+        }
+
+        section {
+            padding: 80px 20px;
+        }
+
+        section:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #2d3748;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .feature-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 30px;
+        }
+
+        .stat-item .number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-item .label {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .code-example pre {
+            margin: 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .architecture-diagram {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .architecture-diagram pre {
+            display: inline-block;
+            text-align: left;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #2d3748;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo">🧠 NeuroNetes</div>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#performance">Performance</a></li>
+                <li><a href="#docs">Documentation</a></li>
+                <li><a href="https://github.com/Bowenislandsong/NeuroNetes">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <h1>NeuroNetes</h1>
+            <p class="tagline">Agent-Native Kubernetes Framework for LLM Workloads</p>
+            <p>Production-ready orchestration for AI agents with GPU-first scheduling, token-aware autoscaling, and conversation-level routing</p>
+            <div class="cta-buttons">
+                <a href="#examples">View Examples</a>
+                <a href="https://github.com/Bowenislandsong/NeuroNetes" class="secondary">Get Started</a>
+            </div>
+        </div>
+    </div>
+
+    <section id="features">
+        <div class="container">
+            <h2>Why NeuroNetes?</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto 40px; font-size: 1.1rem; color: #718096;">
+                Traditional Kubernetes wasn't designed for LLM-based agent workloads. NeuroNetes fills these gaps with specialized controllers, schedulers, and metrics built specifically for AI agents.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">🚀</div>
+                    <h3>Ultra-Fast Scale-from-Zero</h3>
+                    <p>TTFT-aware autoscaling with built-in warm pools, snapshot/restore of model weights, and lazy container initialization for instant response times.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🎮</div>
+                    <h3>GPU-First Scheduling</h3>
+                    <p>Topology-aware GPU bin-packing, MIG partition orchestration, gang scheduling for tensor/pipeline parallel jobs, and NUMA-aware placement.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🎯</div>
+                    <h3>Token-Aware Autoscaling</h3>
+                    <p>Native metrics including tokens/sec, TTFT, queue depth, and context length. Function-of-input-length scaling with session-aware concurrency management.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">💬</div>
+                    <h3>Session & Conversation Affinity</h3>
+                    <p>Sticky routing by conversation ID, graceful session handoff during scaling, and state-aware load balancing with short-lived state management.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">📦</div>
+                    <h3>Model Lifecycle Management</h3>
+                    <p>Model as a first-class Kubernetes object (CRD) with versioning, quantization profiles, sharding plans, and priority-based pin/evict strategies.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>Token-Level Observability</h3>
+                    <p>60+ specialized metrics with standardized TTFT, tokens/sec, tool-call p95, automatic sampling, PII redaction, and retrieval miss monitoring.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">💰</div>
+                    <h3>Cost/SLA-Aware Placement</h3>
+                    <p>Multi-objective scheduling considering SLO, $/token, and carbon footprint. Graceful degradation to smaller models with spot instance integration.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🛡️</div>
+                    <h3>Agent Governance</h3>
+                    <p>Tool permission scopes and rate limits, per-session encrypted memory stores with TTL, audit trails for all tool invocations, and policy-driven access control.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🔄</div>
+                    <h3>Queue-Native Ingress</h3>
+                    <p>Built-in message broker integration (NATS/Kafka/SQS), autoscaling on topic lag, per-queue concurrency limits, and low-latency message-driven concurrency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="architecture">
+        <div class="container">
+            <h2>Architecture</h2>
+            <div class="architecture-diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                    Control Plane                             │
+├─────────────────────────────────────────────────────────────┤
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │   Model    │  │ AgentClass │  │ AgentPool  │  CRDs      │
+│  │ Controller │  │ Controller │  │ Controller │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│                                                               │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │   Token    │  │    GPU     │  │ Cost/SLA   │ Schedulers │
+│  │   HPA      │  │ Topology   │  │  Policy    │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+└─────────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────────┐
+│                      Data Plane                              │
+├─────────────────────────────────────────────────────────────┤
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │  Sticky    │  │  Stream    │  │  Message   │            │
+│  │  Session   │  │  Aware     │  │  Broker    │            │
+│  │  Router    │  │  Ingress   │  │  Class     │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+└─────────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────────┐
+│                    Runtime Layer                             │
+├─────────────────────────────────────────────────────────────┤
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │  Warm Pool │  │ Snapshot/  │  │  Sidecar   │            │
+│  │ Controller │  │  Restore   │  │  Caches    │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+└─────────────────────────────────────────────────────────────┘
+                </pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples" style="background: white;">
+        <div class="container">
+            <h2>Examples & Use Cases</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>💬 Simple Chat Agent</h3>
+                    <p>Deploy a conversational AI agent with session management, HTTP endpoints, and cost optimization. Perfect for customer support or virtual assistants.</p>
+                    <div class="code-example">
+<pre>kubectl apply -f - <<EOF
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: chat-pool
+spec:
+  agentClassRef:
+    name: chat-assistant
+  minReplicas: 3
+  maxReplicas: 30
+  prewarmPercent: 30
+  autoscaling:
+    metrics:
+      - type: concurrent-sessions
+        target: "100"
+      - type: ttft-p95
+        target: "300ms"
+EOF</pre>
+                    </div>
+                    <a href="examples.html#chat-agent" style="color: #667eea; text-decoration: none; font-weight: 600;">View Full Example →</a>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🔧 Code Assistant</h3>
+                    <p>RAG-powered code assistant with multiple tools, queue-based task processing, and session-based state management.</p>
+                    <div class="code-example">
+<pre>toolPermissions:
+  - name: code-search
+    rateLimit: 100/min
+  - name: file-read
+    rateLimit: 50/min
+guardrails:
+  - type: pii-detection
+    action: redact
+slo:
+  ttft: 500ms
+  tokensPerSecond: 50</pre>
+                    </div>
+                    <a href="examples.html#code-assistant" style="color: #667eea; text-decoration: none; font-weight: 600;">View Full Example →</a>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📚 RAG Pipeline</h3>
+                    <p>Complete retrieval-augmented generation setup with vector store, embedding model, and data locality optimization.</p>
+                    <div class="code-example">
+<pre>scheduling:
+  dataLocality:
+    vectorStoreAffinity:
+      - weaviate
+    cacheAffinity:
+      - redis
+  costOptimization:
+    enabled: true
+    spotEnabled: true</pre>
+                    </div>
+                    <a href="examples.html#rag-pipeline" style="color: #667eea; text-decoration: none; font-weight: 600;">View Full Example →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="performance">
+        <div class="container">
+            <h2>Performance & Metrics</h2>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="number">&lt;300ms</div>
+                    <div class="label">Time to First Token (P95)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">60+</div>
+                    <div class="label">Specialized Metrics</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">95.7%</div>
+                    <div class="label">Test Coverage</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">10x</div>
+                    <div class="label">Faster Scale-from-Zero</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 60px; margin-bottom: 30px; text-align: center;">Key Metric Categories</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>UX & Quality</h3>
+                    <ul style="margin-top: 15px; padding-left: 20px;">
+                        <li>TTFT P95 (Time to First Token)</li>
+                        <li>End-to-end latency</li>
+                        <li>RTF (Realtime Factor) ratio</li>
+                        <li>CSAT scores</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Token Economics</h3>
+                    <ul style="margin-top: 15px; padding-left: 20px;">
+                        <li>Tokens per second throughput</li>
+                        <li>Cost per 1K tokens</li>
+                        <li>Context length utilization</li>
+                        <li>Queue depth metrics</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>GPU Efficiency</h3>
+                    <ul style="margin-top: 15px; padding-left: 20px;">
+                        <li>GPU utilization percentage</li>
+                        <li>VRAM usage patterns</li>
+                        <li>MIG slice efficiency</li>
+                        <li>Tensor core utilization</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Tool Performance</h3>
+                    <ul style="margin-top: 15px; padding-left: 20px;">
+                        <li>Tool call latency P95</li>
+                        <li>Tool success rate</li>
+                        <li>RAG retrieval time</li>
+                        <li>Cache hit ratio</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h3 style="text-align: center; margin-bottom: 30px;">Grafana Dashboards</h3>
+                <p style="text-align: center; margin-bottom: 30px;">Pre-built dashboards for complete observability</p>
+                <div class="code-example">
+<pre># Import ready-to-use Grafana dashboard
+kubectl create configmap neuronetes-dashboard \
+  --from-file=config/grafana/neuronetes-dashboard.json \
+  -n monitoring
+
+# Access at http://localhost:3000/d/neuronetes-agents
+# Default credentials: admin/admin</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quickstart" style="background: white;">
+        <div class="container">
+            <h2>Quick Start</h2>
+            
+            <h3 style="margin-bottom: 20px;">Prerequisites</h3>
+            <ul style="max-width: 600px; margin: 0 auto 40px; font-size: 1.1rem; line-height: 2;">
+                <li>Kubernetes 1.25+</li>
+                <li>GPU Operator (for GPU workloads)</li>
+                <li>Metrics Server</li>
+                <li>Prometheus (for custom metrics)</li>
+            </ul>
+
+            <h3 style="margin-bottom: 30px; text-align: center;">Choose Your Platform</h3>
+            
+            <!-- Platform Selection Tabs -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+                <button onclick="showPlatform('aws')" id="btn-aws" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ AWS (EKS)
+                </button>
+                <button onclick="showPlatform('azure')" id="btn-azure" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ Azure (AKS)
+                </button>
+                <button onclick="showPlatform('gcp')" id="btn-gcp" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ GCP (GKE)
+                </button>
+                <button onclick="showPlatform('local')" id="btn-local" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    💻 Local / Kind
+                </button>
+            </div>
+
+            <!-- AWS Installation -->
+            <div id="platform-aws" class="platform-content">
+                <h3 style="margin-bottom: 20px;">AWS (EKS) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Amazon EKS with GPU-enabled EC2 instances</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create EKS Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export CLUSTER_NAME=neuronetes-prod
+export REGION=us-west-2
+export K8S_VERSION=1.28
+
+# Create cluster with GPU node groups
+eksctl create cluster \
+  --name $CLUSTER_NAME \
+  --region $REGION \
+  --version $K8S_VERSION \
+  --node-type m5.xlarge \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 5 \
+  --managed \
+  --with-oidc
+
+# Add GPU node group (P4d instances with A100 GPUs)
+eksctl create nodegroup \
+  --cluster $CLUSTER_NAME \
+  --region $REGION \
+  --name gpu-nodes \
+  --node-type p4d.24xlarge \
+  --nodes 1 \
+  --nodes-min 0 \
+  --nodes-max 10 \
+  --node-labels workload=ai-agent \
+  --managed</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Operator</h4>
+                <div class="code-example">
+<pre># Add NVIDIA Helm repository
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+# Install NVIDIA GPU Operator
+helm install gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator \
+  --create-namespace \
+  --set operator.defaultRuntime=containerd</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
+<pre># Install CRDs
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
+
+# Deploy controllers
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
+
+# Verify installation
+kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/aws.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete AWS Deployment Guide →</a>
+                </p>
+            </div>
+
+            <!-- Azure Installation -->
+            <div id="platform-azure" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">Azure (AKS) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Azure Kubernetes Service with NC-series VMs</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create AKS Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export RESOURCE_GROUP=neuronetes-prod
+export LOCATION=eastus
+export CLUSTER_NAME=neuronetes-aks
+
+# Create resource group
+az group create \
+  --name $RESOURCE_GROUP \
+  --location $LOCATION
+
+# Create AKS cluster
+az aks create \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME \
+  --node-count 2 \
+  --node-vm-size Standard_D4s_v3 \
+  --enable-managed-identity \
+  --enable-addons monitoring \
+  --kubernetes-version 1.28 \
+  --generate-ssh-keys
+
+# Add GPU node pool (NCv3 with V100 or NC A100 v4)
+az aks nodepool add \
+  --resource-group $RESOURCE_GROUP \
+  --cluster-name $CLUSTER_NAME \
+  --name gpunodes \
+  --node-count 1 \
+  --node-vm-size Standard_NC24ads_A100_v4 \
+  --labels workload=ai-agent \
+  --node-taints sku=gpu:NoSchedule</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Drivers</h4>
+                <div class="code-example">
+<pre># Get cluster credentials
+az aks get-credentials \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME
+
+# Install NVIDIA GPU Operator
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+helm install gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator \
+  --create-namespace \
+  --set operator.defaultRuntime=containerd</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
+<pre># Install CRDs
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
+
+# Deploy controllers
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
+
+# Verify installation
+kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/azure.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete Azure Deployment Guide →</a>
+                </p>
+            </div>
+
+            <!-- GCP Installation -->
+            <div id="platform-gcp" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">GCP (GKE) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Google Kubernetes Engine with A100/H100 GPUs</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create GKE Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export PROJECT_ID=neuronetes-prod
+export REGION=us-central1
+export ZONE=us-central1-a
+export CLUSTER_NAME=neuronetes-cluster
+
+# Set project and enable APIs
+gcloud config set project $PROJECT_ID
+gcloud services enable container.googleapis.com
+gcloud services enable compute.googleapis.com
+
+# Create GKE cluster
+gcloud container clusters create $CLUSTER_NAME \
+  --region $REGION \
+  --cluster-version 1.28 \
+  --machine-type n1-standard-4 \
+  --num-nodes 2 \
+  --enable-autoscaling \
+  --min-nodes 2 \
+  --max-nodes 10 \
+  --enable-stackdriver-kubernetes \
+  --addons HorizontalPodAutoscaling,HttpLoadBalancing
+
+# Add GPU node pool (A100)
+gcloud container node-pools create gpu-pool \
+  --cluster $CLUSTER_NAME \
+  --region $REGION \
+  --accelerator type=nvidia-tesla-a100,count=1 \
+  --machine-type a2-highgpu-1g \
+  --num-nodes 1 \
+  --min-nodes 0 \
+  --max-nodes 10 \
+  --enable-autoscaling \
+  --node-labels=workload=ai-agent</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Drivers</h4>
+                <div class="code-example">
+<pre># Install NVIDIA GPU device drivers
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded.yaml
+
+# Verify GPU nodes
+kubectl get nodes -l cloud.google.com/gke-accelerator=nvidia-tesla-a100</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
+<pre># Install CRDs
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
+
+# Deploy controllers
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
+
+# Verify installation
+kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/gcp.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete GCP Deployment Guide →</a>
+                </p>
+            </div>
+
+            <!-- Local Development -->
+            <div id="platform-local" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">Local Development Setup</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Quick setup for local development and testing with Kind or Docker Compose</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Option 1: Docker Compose (Fastest)</h4>
+                <div class="code-example">
+<pre># Start all services (Redis, NATS, Weaviate, Prometheus, Grafana)
+make docker-compose-up
+
+# Access services:
+# - Grafana: http://localhost:3000 (admin/admin)
+# - Prometheus: http://localhost:9090
+# - Weaviate: http://localhost:8080
+# - NeuroNetes API: http://localhost:8081
+
+# View logs
+make docker-compose-logs
+
+# Stop services
+make docker-compose-down</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Option 2: Kind Cluster (Full K8s)</h4>
+                <div class="code-example">
+<pre># Create local Kubernetes cluster with 3 nodes
+make dev
+
+# Install NeuroNetes
+kubectl apply -f config/crd/
+kubectl apply -f config/deploy/
+
+# Deploy example resources
+kubectl apply -f config/samples/
+
+# Check status
+kubectl get models,agentclasses,agentpools
+
+# Clean up
+make dev-clean</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Building from Source</h4>
+                <div class="code-example">
+<pre># Clone repository
+git clone https://github.com/Bowenislandsong/NeuroNetes.git
+cd NeuroNetes
+
+# Install dependencies
+make deps
+
+# Build all components
+make build
+
+# Run tests
+make test
+
+# Run with local changes
+make run-local</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/local-development.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete Local Development Guide →</a>
+                </p>
+            </div>
+
+            <script>
+                function showPlatform(platform) {
+                    // Hide all platforms
+                    document.querySelectorAll('.platform-content').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Reset all buttons
+                    document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                        btn.style.background = '#e2e8f0';
+                        btn.style.color = '#2d3748';
+                    });
+                    
+                    // Show selected platform
+                    document.getElementById('platform-' + platform).style.display = 'block';
+                    
+                    // Highlight selected button
+                    document.getElementById('btn-' + platform).style.background = '#667eea';
+                    document.getElementById('btn-' + platform).style.color = 'white';
+                }
+            </script>
+        </div>
+    </section>
+
+    <section id="docs">
+        <div class="container">
+            <h2>Documentation</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>📖 Core Guides</h3>
+                    <ul style="margin-top: 15px;">
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/architecture.md">Architecture Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/crds.md">CRD Reference</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/scheduler.md">Scheduler Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/autoscaling.md">Autoscaling Guide</a></li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🔧 Operations</h3>
+                    <ul style="margin-top: 15px;">
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/operations.md">Operations Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/observability.md">Observability</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/metrics.md">Metrics Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/security.md">Security Guide</a></li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>☁️ Cloud Deployment</h3>
+                    <ul style="margin-top: 15px;">
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/aws.md">AWS (EKS)</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/gcp.md">GCP (GKE)</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/azure.md">Azure (AKS)</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/README.md">Multi-cloud Strategies</a></li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🛠️ Development</h3>
+                    <ul style="margin-top: 15px;">
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/development.md">Development Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/local-development.md">Local Development</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/plugins.md">Plugin Guide</a></li>
+                        <li><a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/CONTRIBUTING.md">Contributing</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 10px;">
+                <strong>NeuroNetes</strong> - Agent-Native Kubernetes Framework
+            </p>
+            <p style="margin-bottom: 20px;">
+                Apache License 2.0 | 
+                <a href="https://github.com/Bowenislandsong/NeuroNetes">GitHub</a> | 
+                <a href="https://github.com/Bowenislandsong/NeuroNetes/issues">Issues</a> | 
+                <a href="https://github.com/Bowenislandsong/NeuroNetes/discussions">Discussions</a>
+            </p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">
+                Built with ❤️ for the AI agent community
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

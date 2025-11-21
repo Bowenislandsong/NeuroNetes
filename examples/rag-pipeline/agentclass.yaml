@@ -1,0 +1,60 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentClass
+metadata:
+  name: rag-agent
+  namespace: rag-system
+spec:
+  modelRef:
+    name: llama-3-70b-rag
+  
+  maxContextLength: 128000
+  
+  systemPrompt: |
+    You are a helpful assistant with access to a knowledge base.
+    
+    When answering questions:
+    1. Use the retrieve tool to find relevant information
+    2. Cite sources from the retrieved documents
+    3. Be accurate and admit when you don't know
+    4. Synthesize information from multiple sources
+    
+    Format citations as [Source: document_id].
+  
+  temperature: 0.3
+  maxTokens: 4096
+  
+  toolPermissions:
+    - name: retrieve
+      rateLimit: "50/min"
+      timeout: 5s
+      maxConcurrency: 3
+      config:
+        top_k: 5
+        rerank: true
+        cache_ttl: 300
+      requiredScopes:
+        - read:documents
+    
+    - name: rerank
+      rateLimit: "30/min"
+      timeout: 2s
+      maxConcurrency: 2
+  
+  guardrails:
+    - type: pii-detection
+      action: redact
+    
+    - type: content-filter
+      action: block
+  
+  slo:
+    ttft: 800ms
+    tokensPerSecond: 45
+    p95Latency: 3s
+  
+  memoryConfig:
+    type: redis
+    ttl: 1h
+    maxSize: 20000
+    encrypted: true
+    connectionString: redis://redis.rag-system:6379

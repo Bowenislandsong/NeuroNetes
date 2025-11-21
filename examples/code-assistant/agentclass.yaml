@@ -1,0 +1,55 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentClass
+metadata:
+  name: code-assistant
+  namespace: default
+spec:
+  modelRef:
+    name: llama-3-70b
+  
+  maxContextLength: 128000
+  
+  systemPrompt: |
+    You are an expert code assistant. Help developers with:
+    - Code review and suggestions
+    - Bug fixing and debugging
+    - Documentation generation
+    - Code search and navigation
+    
+    Use the available tools to access the codebase.
+  
+  temperature: 0.3
+  maxTokens: 4096
+  
+  toolPermissions:
+    - name: code-search
+      rateLimit: 100/min
+      timeout: 5s
+      maxConcurrency: 3
+      requiredScopes:
+        - read:code
+    
+    - name: file-read
+      rateLimit: 50/min
+      timeout: 2s
+      maxConcurrency: 2
+      requiredScopes:
+        - read:files
+  
+  guardrails:
+    - type: pii-detection
+      action: redact
+    - type: code-injection-check
+      action: block
+  
+  slo:
+    ttft: 500ms
+    tokensPerSecond: 50
+    p95Latency: 2s
+  
+  memoryConfig:
+    type: redis
+    ttl: 1h
+    maxSize: 20000
+    encrypted: true
+    connectionString: redis://redis:6379

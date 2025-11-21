@@ -436,6 +436,7 @@ go test ./pkg/metrics/... -bench=. -benchmem
 
 ### AWS CloudWatch
 
+{% raw %}
 ```go
 import "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 
@@ -449,9 +450,11 @@ putMetricData(&cloudwatch.PutMetricDataInput{
     }},
 })
 ```
+{% endraw %}
 
 ### GCP Cloud Monitoring
 
+{% raw %}
 ```go
 import monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 
@@ -465,6 +468,7 @@ client.CreateTimeSeries(ctx, &monitoringpb.CreateTimeSeriesRequest{
     }},
 })
 ```
+{% endraw %}
 
 ### Azure Monitor
 
