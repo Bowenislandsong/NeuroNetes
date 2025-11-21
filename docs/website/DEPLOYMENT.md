@@ -9,10 +9,15 @@ This repository includes a comprehensive project website at `docs/website/`.
 1. Go to repository Settings → Pages
 2. Under "Source", select "Deploy from a branch"
 3. Select branch: `main` (or your default branch)
-4. Select folder: `/docs/website`
+4. Select folder: `/docs`
 5. Click "Save"
 
-The website will be available at: `https://bowenislandsong.github.io/NeuroNetes/website/`
+The website will be available at: `https://bowenislandsong.github.io/NeuroNetes/`
+
+**Important Files:**
+- `.nojekyll` - Disables Jekyll processing for GitHub Pages
+- `index.html` - Root redirect to website subdirectory
+- `website/` - Contains the actual website files
 
 ### Option 2: GitHub Actions (Alternative)
 
