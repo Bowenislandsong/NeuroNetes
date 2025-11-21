@@ -535,35 +535,320 @@ kubectl create configmap neuronetes-dashboard \
                 <li>Prometheus (for custom metrics)</li>
             </ul>
 
-            <h3 style="margin-bottom: 20px;">Installation</h3>
-            <div class="code-example">
+            <h3 style="margin-bottom: 30px; text-align: center;">Choose Your Platform</h3>
+            
+            <!-- Platform Selection Tabs -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+                <button onclick="showPlatform('aws')" id="btn-aws" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ AWS (EKS)
+                </button>
+                <button onclick="showPlatform('azure')" id="btn-azure" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ Azure (AKS)
+                </button>
+                <button onclick="showPlatform('gcp')" id="btn-gcp" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    ☁️ GCP (GKE)
+                </button>
+                <button onclick="showPlatform('local')" id="btn-local" style="padding: 12px 30px; background: #e2e8f0; color: #2d3748; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s;">
+                    💻 Local / Kind
+                </button>
+            </div>
+
+            <!-- AWS Installation -->
+            <div id="platform-aws" class="platform-content">
+                <h3 style="margin-bottom: 20px;">AWS (EKS) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Amazon EKS with GPU-enabled EC2 instances</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create EKS Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export CLUSTER_NAME=neuronetes-prod
+export REGION=us-west-2
+export K8S_VERSION=1.28
+
+# Create cluster with GPU node groups
+eksctl create cluster \
+  --name $CLUSTER_NAME \
+  --region $REGION \
+  --version $K8S_VERSION \
+  --node-type m5.xlarge \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 5 \
+  --managed \
+  --with-oidc
+
+# Add GPU node group (P4d instances with A100 GPUs)
+eksctl create nodegroup \
+  --cluster $CLUSTER_NAME \
+  --region $REGION \
+  --name gpu-nodes \
+  --node-type p4d.24xlarge \
+  --nodes 1 \
+  --nodes-min 0 \
+  --nodes-max 10 \
+  --node-labels workload=ai-agent \
+  --managed</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Operator</h4>
+                <div class="code-example">
+<pre># Add NVIDIA Helm repository
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+# Install NVIDIA GPU Operator
+helm install gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator \
+  --create-namespace \
+  --set operator.defaultRuntime=containerd</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
 <pre># Install CRDs
-kubectl apply -f config/crd/
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
 
 # Deploy controllers
-kubectl apply -f config/deploy/
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
 
 # Verify installation
 kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/aws.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete AWS Deployment Guide →</a>
+                </p>
             </div>
 
-            <h3 style="margin-top: 40px; margin-bottom: 20px;">Local Development</h3>
-            <div class="code-example">
-<pre># Start local services (Redis, NATS, Weaviate, Prometheus, Grafana)
+            <!-- Azure Installation -->
+            <div id="platform-azure" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">Azure (AKS) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Azure Kubernetes Service with NC-series VMs</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create AKS Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export RESOURCE_GROUP=neuronetes-prod
+export LOCATION=eastus
+export CLUSTER_NAME=neuronetes-aks
+
+# Create resource group
+az group create \
+  --name $RESOURCE_GROUP \
+  --location $LOCATION
+
+# Create AKS cluster
+az aks create \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME \
+  --node-count 2 \
+  --node-vm-size Standard_D4s_v3 \
+  --enable-managed-identity \
+  --enable-addons monitoring \
+  --kubernetes-version 1.28 \
+  --generate-ssh-keys
+
+# Add GPU node pool (NCv3 with V100 or NC A100 v4)
+az aks nodepool add \
+  --resource-group $RESOURCE_GROUP \
+  --cluster-name $CLUSTER_NAME \
+  --name gpunodes \
+  --node-count 1 \
+  --node-vm-size Standard_NC24ads_A100_v4 \
+  --labels workload=ai-agent \
+  --node-taints sku=gpu:NoSchedule</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Drivers</h4>
+                <div class="code-example">
+<pre># Get cluster credentials
+az aks get-credentials \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME
+
+# Install NVIDIA GPU Operator
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+helm install gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator \
+  --create-namespace \
+  --set operator.defaultRuntime=containerd</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
+<pre># Install CRDs
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
+
+# Deploy controllers
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
+
+# Verify installation
+kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/azure.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete Azure Deployment Guide →</a>
+                </p>
+            </div>
+
+            <!-- GCP Installation -->
+            <div id="platform-gcp" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">GCP (GKE) Installation</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Deploy NeuroNetes on Google Kubernetes Engine with A100/H100 GPUs</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">1. Create GKE Cluster</h4>
+                <div class="code-example">
+<pre># Configure variables
+export PROJECT_ID=neuronetes-prod
+export REGION=us-central1
+export ZONE=us-central1-a
+export CLUSTER_NAME=neuronetes-cluster
+
+# Set project and enable APIs
+gcloud config set project $PROJECT_ID
+gcloud services enable container.googleapis.com
+gcloud services enable compute.googleapis.com
+
+# Create GKE cluster
+gcloud container clusters create $CLUSTER_NAME \
+  --region $REGION \
+  --cluster-version 1.28 \
+  --machine-type n1-standard-4 \
+  --num-nodes 2 \
+  --enable-autoscaling \
+  --min-nodes 2 \
+  --max-nodes 10 \
+  --enable-stackdriver-kubernetes \
+  --addons HorizontalPodAutoscaling,HttpLoadBalancing
+
+# Add GPU node pool (A100)
+gcloud container node-pools create gpu-pool \
+  --cluster $CLUSTER_NAME \
+  --region $REGION \
+  --accelerator type=nvidia-tesla-a100,count=1 \
+  --machine-type a2-highgpu-1g \
+  --num-nodes 1 \
+  --min-nodes 0 \
+  --max-nodes 10 \
+  --enable-autoscaling \
+  --node-labels=workload=ai-agent</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">2. Install GPU Drivers</h4>
+                <div class="code-example">
+<pre># Install NVIDIA GPU device drivers
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded.yaml
+
+# Verify GPU nodes
+kubectl get nodes -l cloud.google.com/gke-accelerator=nvidia-tesla-a100</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">3. Install NeuroNetes</h4>
+                <div class="code-example">
+<pre># Install CRDs
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/crd/
+
+# Deploy controllers
+kubectl apply -f https://raw.githubusercontent.com/Bowenislandsong/NeuroNetes/main/config/deploy/
+
+# Verify installation
+kubectl get pods -n neuronetes-system</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/cloud-deployment/gcp.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete GCP Deployment Guide →</a>
+                </p>
+            </div>
+
+            <!-- Local Development -->
+            <div id="platform-local" class="platform-content" style="display: none;">
+                <h3 style="margin-bottom: 20px;">Local Development Setup</h3>
+                <p style="margin-bottom: 20px; text-align: center; color: #718096;">Quick setup for local development and testing with Kind or Docker Compose</p>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Option 1: Docker Compose (Fastest)</h4>
+                <div class="code-example">
+<pre># Start all services (Redis, NATS, Weaviate, Prometheus, Grafana)
 make docker-compose-up
 
 # Access services:
 # - Grafana: http://localhost:3000 (admin/admin)
 # - Prometheus: http://localhost:9090
 # - Weaviate: http://localhost:8080
-# - NeuroNetes: http://localhost:8081
+# - NeuroNetes API: http://localhost:8081
 
-# Create local Kind cluster
+# View logs
+make docker-compose-logs
+
+# Stop services
+make docker-compose-down</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Option 2: Kind Cluster (Full K8s)</h4>
+                <div class="code-example">
+<pre># Create local Kubernetes cluster with 3 nodes
 make dev
 
+# Install NeuroNetes
+kubectl apply -f config/crd/
+kubectl apply -f config/deploy/
+
 # Deploy example resources
-kubectl apply -f config/samples/</pre>
+kubectl apply -f config/samples/
+
+# Check status
+kubectl get models,agentclasses,agentpools
+
+# Clean up
+make dev-clean</pre>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Building from Source</h4>
+                <div class="code-example">
+<pre># Clone repository
+git clone https://github.com/Bowenislandsong/NeuroNetes.git
+cd NeuroNetes
+
+# Install dependencies
+make deps
+
+# Build all components
+make build
+
+# Run tests
+make test
+
+# Run with local changes
+make run-local</pre>
+                </div>
+
+                <p style="margin-top: 30px; text-align: center;">
+                    <a href="https://github.com/Bowenislandsong/NeuroNetes/blob/main/docs/local-development.md" style="color: #667eea; font-weight: 600; text-decoration: none;">📖 View Complete Local Development Guide →</a>
+                </p>
             </div>
+
+            <script>
+                function showPlatform(platform) {
+                    // Hide all platforms
+                    document.querySelectorAll('.platform-content').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Reset all buttons
+                    document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                        btn.style.background = '#e2e8f0';
+                        btn.style.color = '#2d3748';
+                    });
+                    
+                    // Show selected platform
+                    document.getElementById('platform-' + platform).style.display = 'block';
+                    
+                    // Highlight selected button
+                    document.getElementById('btn-' + platform).style.background = '#667eea';
+                    document.getElementById('btn-' + platform).style.color = 'white';
+                }
+            </script>
         </div>
     </section>
 
