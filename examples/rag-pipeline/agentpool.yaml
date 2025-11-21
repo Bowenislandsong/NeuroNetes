@@ -1,0 +1,61 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentPool
+metadata:
+  name: rag-pool
+  namespace: rag-system
+spec:
+  agentClassRef:
+    name: rag-agent
+  
+  minReplicas: 3
+  maxReplicas: 15
+  prewarmPercent: 25
+  
+  migProfile: "3g.20gb"
+  
+  autoscaling:
+    metrics:
+      - type: concurrent-sessions
+        target: "30"
+      - type: ttft-p95
+        target: "800ms"
+      - type: tool-call-rate
+        target: "10"
+    
+    behavior:
+      scaleUp:
+        stabilizationWindow: 60s
+        maxChangeAbsolute: 4
+      scaleDown:
+        stabilizationWindow: 240s
+        maxChangeAbsolute: 2
+  
+  gpuRequirements:
+    count: 2
+    memory: "40Gi"
+    type: "A100"
+  
+  sessionAffinity:
+    enabled: true
+    keyHeader: "X-Session-ID"
+    ttl: 1h
+    type: conversation-id
+  
+  scheduling:
+    priority: 90
+    
+    # Co-locate with vector store for low latency
+    dataLocality:
+      vectorStoreAffinity:
+        - weaviate
+      cacheAffinity:
+        - redis
+    
+    costOptimization:
+      enabled: true
+      spotEnabled: true
+      sloHeadroomMs: 1500
+    
+    nodeSelector:
+      node-type: gpu
+      region: us-west-2

@@ -2,6 +2,8 @@
 
 NeuroNetes is a comprehensive Kubernetes extension framework designed specifically for AI agent workloads, addressing the unique requirements of LLM-based applications that traditional Kubernetes wasn't optimized for.
 
+**📚 [View Project Website](https://bowenislandsong.github.io/NeuroNetes/website/)** | **🎯 [See Examples](https://bowenislandsong.github.io/NeuroNetes/website/examples.html)** | **📊 [Performance Benchmarks](https://bowenislandsong.github.io/NeuroNetes/website/benchmarks.html)**
+
 ## Overview
 
 While Kubernetes excels at managing traditional microservices ("pods + services"), agent-style, LLM-heavy workloads stress dimensions K8s was never designed to handle. NeuroNetes fills these gaps with agent-aware scheduling, token-based autoscaling, GPU-first orchestration, and conversation-level routing.
@@ -275,11 +277,18 @@ See [Metrics Guide](docs/metrics.md) for complete documentation.
 
 ## Examples
 
-- [Simple Chat Agent](examples/chat-agent/) - Basic conversational agent
-- [Code Assistant](examples/code-assistant/) - Multi-tool code helper
-- [RAG Pipeline](examples/rag-pipeline/) - Retrieval-augmented generation
-- [Multi-Model Routing](examples/multi-model/) - Cost-optimized model selection
-- [Spot Instance Integration](examples/spot-integration/) - SLO-aware spot usage
+**🌐 [View Complete Examples with Results](https://bowenislandsong.github.io/NeuroNetes/website/examples.html)**
+
+- [Simple Chat Agent](examples/chat-agent/) - Basic conversational agent ([Performance Results](examples/chat-agent/RESULTS.md))
+- [Code Assistant](examples/code-assistant/) - Multi-tool code helper ([Performance Results](examples/code-assistant/RESULTS.md))
+- [RAG Pipeline](examples/rag-pipeline/) - Retrieval-augmented generation ([Performance Results](examples/rag-pipeline/RESULTS.md))
+
+Each example includes:
+- ✅ Complete YAML configurations
+- ✅ Expected performance metrics (TTFT, throughput, cost)
+- ✅ Sample outputs and quality metrics
+- ✅ Cost analysis and optimization tips
+- ✅ Comparison with alternatives
 
 ## Development
 

@@ -1,0 +1,36 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: AgentClass
+metadata:
+  name: chat-assistant
+  namespace: default
+spec:
+  modelRef:
+    name: llama-3-8b-chat
+  
+  maxContextLength: 8192
+  
+  systemPrompt: |
+    You are a helpful, friendly AI assistant. Provide clear,
+    concise, and accurate responses. Be conversational but professional.
+  
+  temperature: 0.8
+  maxTokens: 2048
+  
+  guardrails:
+    - type: pii-detection
+      action: redact
+      threshold: 0.8
+    
+    - type: safety-check
+      action: block
+      threshold: 0.9
+  
+  slo:
+    ttft: 300ms
+    tokensPerSecond: 75
+    p95Latency: 1s
+  
+  memoryConfig:
+    type: ephemeral
+    ttl: 30m
+    maxSize: 5000

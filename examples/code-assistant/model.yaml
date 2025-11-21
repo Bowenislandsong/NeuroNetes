@@ -1,0 +1,19 @@
+apiVersion: neuronetes.io/v1alpha1
+kind: Model
+metadata:
+  name: llama-3-70b
+  namespace: default
+spec:
+  weightsURI: s3://models/llama-3-70b-instruct/
+  size: 140Gi
+  quantization: int4
+  architecture: llama
+  parameterCount: "70B"
+  shardSpec:
+    count: 4
+    strategy: tensor-parallel
+    topology:
+      locality: same-node
+  cachePolicy:
+    priority: high
+    pinDuration: 4h
