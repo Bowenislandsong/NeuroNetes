@@ -525,7 +525,7 @@ data:
           severity: warning
         annotations:
           summary: "High time-to-first-token"
-          description: "P95 TTFT is {{ $value }}s (threshold: 1s)"
+          description: "P95 TTFT is {% raw %}{{ $value }}{% endraw %}s (threshold: 1s)"
       
       # Low throughput
       - alert: LowThroughput
@@ -536,7 +536,7 @@ data:
           severity: warning
         annotations:
           summary: "Low token throughput"
-          description: "Throughput is {{ $value }} tokens/sec"
+          description: "Throughput is {% raw %}{{ $value }}{% endraw %} tokens/sec"
       
       # High error rate
       - alert: HighErrorRate
@@ -548,7 +548,7 @@ data:
           severity: critical
         annotations:
           summary: "High error rate"
-          description: "Error rate is {{ $value | humanizePercentage }}"
+          description: "Error rate is {% raw %}{{ $value | humanizePercentage }}{% endraw %}"
       
       # Safety blocks spike
       - alert: SafetyBlocksSpike
@@ -559,7 +559,7 @@ data:
           severity: warning
         annotations:
           summary: "Spike in safety blocks"
-          description: "{{ $value }} blocks/sec"
+          description: "{% raw %}{{ $value }}{% endraw %} blocks/sec"
       
       # Cost budget exceeded
       - alert: BudgetExceeded
@@ -570,7 +570,7 @@ data:
           severity: warning
         annotations:
           summary: "Hourly cost budget exceeded"
-          description: "Cost is ${{ $value }}/hour"
+          description: "Cost is ${% raw %}{{ $value }}{% endraw %}/hour"
 ```
 
 ### Alert Channels

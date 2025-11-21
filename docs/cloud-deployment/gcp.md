@@ -506,6 +506,7 @@ import (
     monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
+{% raw %}
 // Example: Report token throughput
 func reportTokenThroughput(tokensPerSecond float64) error {
     ctx := context.Background()
@@ -536,6 +537,7 @@ func reportTokenThroughput(tokensPerSecond float64) error {
     return client.CreateTimeSeries(ctx, req)
 }
 ```
+{% endraw %}
 
 ## Troubleshooting
 
