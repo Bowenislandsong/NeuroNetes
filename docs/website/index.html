@@ -400,8 +400,8 @@
             </div>
             
             <div style="text-align: center; margin-top: 50px;">
-                <div class="code-example" style="display: inline-block; text-align: left; max-width: 600px;">
-<pre># That's it. Your agent is now production-ready.
+                <div class="code-example" style="display: inline-block; text-align: left; max-width: 600px;" role="region" aria-label="Example deployment commands">
+<pre><code># That's it. Your agent is now production-ready.
 kubectl apply -f model.yaml
 kubectl apply -f agentclass.yaml
 kubectl apply -f agentpool.yaml
@@ -409,7 +409,7 @@ kubectl apply -f agentpool.yaml
 # Check status
 kubectl get agentpools
 # NAME         READY   REPLICAS   TTFT-P95
-# chat-pool    True    5          142ms</pre>
+# chat-pool    True    5          142ms</code></pre>
                 </div>
             </div>
         </div>
