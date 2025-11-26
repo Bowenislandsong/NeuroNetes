@@ -1,0 +1,63 @@
+# NeuroNetes AKS Deployment
+# Deploy with: kubectl apply -k deploy/aks/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: neuronetes-system
+
+resources:
+  - ../eks/namespace.yaml
+  - ../../config/crd
+  - ../../config/rbac
+  - ../eks/controller-deployment.yaml
+  - ../eks/scheduler-deployment.yaml
+  - ../eks/autoscaler-deployment.yaml
+  - ../eks/servicemonitor.yaml
+
+# Common labels
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: neuronetes
+      app.kubernetes.io/version: v0.1.0
+      app.kubernetes.io/part-of: neuronetes
+      deployment.kubernetes.io/target: aks
+
+# Configure images
+images:
+  - name: controller
+    newName: ghcr.io/bowenislandsong/neuronetes
+    newTag: v0.1.0
+
+# Patches for AKS-specific configurations
+patches:
+  # Add Azure-specific environment variables
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: AZURE_SUBSCRIPTION_ID
+          valueFrom:
+            configMapKeyRef:
+              name: neuronetes-config
+              key: azure-subscription-id
+              optional: true
+    target:
+      kind: Deployment
+      name: neuronetes-controller-manager
+  # Add tolerations for AKS GPU taints
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "kubernetes.azure.com/scalesetpriority"
+            operator: "Equal"
+            value: "spot"
+            effect: "NoSchedule"
+          - key: "nvidia.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+    target:
+      kind: Deployment
+      name: neuronetes-.*

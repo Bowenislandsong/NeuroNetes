@@ -1,0 +1,119 @@
+# Default values for neuronetes
+# This is a YAML-formatted file.
+
+# Image configuration
+image:
+  repository: ghcr.io/bowenislandsong/neuronetes
+  pullPolicy: IfNotPresent
+  tag: ""  # Defaults to appVersion
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Controller Manager configuration
+controller:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+# Scheduler configuration
+scheduler:
+  enabled: true
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Autoscaler configuration
+autoscaler:
+  enabled: true
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Metrics configuration
+metrics:
+  enabled: true
+  port: 8080
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    namespace: ""
+    additionalLabels: {}
+
+# RBAC configuration
+rbac:
+  create: true
+
+# ServiceAccount configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Namespace configuration
+namespace:
+  create: true
+  name: neuronetes-system
+
+# CRDs installation
+crds:
+  install: true
+
+# Logging configuration
+logging:
+  level: info
+  format: json
+
+# Feature gates
+features:
+  tokenAwareAutoscaling: true
+  gpuTopologyScheduling: true
+  sessionAffinity: true
+  warmPools: true
+  costOptimization: true
+
+# High availability configuration
+highAvailability:
+  enabled: false
+  controller:
+    replicas: 3
+  scheduler:
+    replicas: 2
+  autoscaler:
+    replicas: 2

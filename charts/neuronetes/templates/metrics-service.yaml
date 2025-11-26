@@ -1,0 +1,44 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neuronetes.fullname" . }}-metrics
+  namespace: {{ include "neuronetes.namespace" . }}
+  labels:
+    {{- include "neuronetes.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "neuronetes.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "neuronetes.fullname" . }}
+  namespace: {{ .Values.metrics.serviceMonitor.namespace | default (include "neuronetes.namespace" .) }}
+  labels:
+    {{- include "neuronetes.labels" . | nindent 4 }}
+    {{- with .Values.metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.metrics.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "neuronetes.namespace" . }}
+  selector:
+    matchLabels:
+      {{- include "neuronetes.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: metrics
+{{- end }}
+{{- end }}

@@ -1,0 +1,82 @@
+# Storage configuration for on-premises deployment
+# This assumes you have a storage class available or uses local storage
+
+---
+# StorageClass for model cache (local NVMe or SSD recommended)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: neuronetes-model-cache
+  labels:
+    app.kubernetes.io/name: neuronetes
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+---
+# Example PersistentVolume for model cache
+# Modify path and nodeAffinity for your environment
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neuronetes-model-cache-pv
+  labels:
+    app.kubernetes.io/name: neuronetes
+    type: local
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: neuronetes-model-cache
+  local:
+    path: /data/neuronetes/model-cache  # Update this path
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - gpu-node-1  # Update with your GPU node names
+                - gpu-node-2
+---
+# PersistentVolumeClaim for model cache
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neuronetes-model-cache
+  namespace: neuronetes-system
+  labels:
+    app.kubernetes.io/name: neuronetes
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: neuronetes-model-cache
+  resources:
+    requests:
+      storage: 500Gi
+---
+# ConfigMap for on-premises configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neuronetes-config
+  namespace: neuronetes-system
+  labels:
+    app.kubernetes.io/name: neuronetes
+data:
+  # Model storage configuration
+  model-storage-path: "/data/neuronetes/models"
+  model-cache-path: "/data/neuronetes/model-cache"
+  
+  # GPU configuration
+  gpu-topology-enabled: "true"
+  gpu-mig-enabled: "false"
+  
+  # Network configuration
+  internal-registry: ""  # Set to your internal registry if needed
+  
+  # Autoscaling configuration
+  min-scale-delay: "30s"
+  max-scale-delay: "5m"

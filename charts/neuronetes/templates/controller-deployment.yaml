@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "neuronetes.fullname" . }}-controller
+  namespace: {{ include "neuronetes.namespace" . }}
+  labels:
+    {{- include "neuronetes.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  replicas: {{ .Values.highAvailability.enabled | ternary .Values.highAvailability.controller.replicas .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      {{- include "neuronetes.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: controller
+  template:
+    metadata:
+      {{- with .Values.controller.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "neuronetes.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: controller
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "neuronetes.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.controller.podSecurityContext | nindent 8 }}
+      containers:
+        - name: manager
+          image: {{ include "neuronetes.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --leader-elect={{ .Values.highAvailability.enabled }}
+            - --metrics-bind-address=:{{ .Values.metrics.port }}
+            - --health-probe-bind-address=:8081
+            - --log-level={{ .Values.logging.level }}
+          env:
+            - name: ENABLE_TOKEN_AUTOSCALING
+              value: "{{ .Values.features.tokenAwareAutoscaling }}"
+            - name: ENABLE_GPU_TOPOLOGY_SCHEDULING
+              value: "{{ .Values.features.gpuTopologyScheduling }}"
+            - name: ENABLE_SESSION_AFFINITY
+              value: "{{ .Values.features.sessionAffinity }}"
+            - name: ENABLE_WARM_POOLS
+              value: "{{ .Values.features.warmPools }}"
+            - name: ENABLE_COST_OPTIMIZATION
+              value: "{{ .Values.features.costOptimization }}"
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
+            - name: health
+              containerPort: 8081
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.controller.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.controller.securityContext | nindent 12 }}
+      {{- with .Values.controller.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

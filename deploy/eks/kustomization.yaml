@@ -1,0 +1,45 @@
+# NeuroNetes EKS Deployment Configuration
+# This kustomization includes all resources needed for AWS EKS deployment
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: neuronetes-system
+
+resources:
+  - namespace.yaml
+  - ../../config/crd
+  - ../../config/rbac
+  - controller-deployment.yaml
+  - scheduler-deployment.yaml
+  - autoscaler-deployment.yaml
+  - servicemonitor.yaml
+
+# Common labels
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: neuronetes
+      app.kubernetes.io/version: v0.1.0
+      app.kubernetes.io/part-of: neuronetes
+      deployment.kubernetes.io/target: eks
+
+# Configure images
+images:
+  - name: controller
+    newName: ghcr.io/bowenislandsong/neuronetes
+    newTag: v0.1.0
+
+# Patches for EKS-specific configurations
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "neuronetes.ai/gpu"
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
+    target:
+      kind: Deployment
+      name: neuronetes-.*
