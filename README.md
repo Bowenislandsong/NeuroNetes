@@ -2,7 +2,7 @@
 
 NeuroNetes is a comprehensive Kubernetes extension framework designed specifically for AI agent workloads, addressing the unique requirements of LLM-based applications that traditional Kubernetes wasn't optimized for.
 
-**📚 [View Project Website](https://bowenislandsong.github.io/NeuroNetes/website/)** | **🎯 [See Examples](https://bowenislandsong.github.io/NeuroNetes/website/examples.html)** | **📊 [Performance Benchmarks](https://bowenislandsong.github.io/NeuroNetes/website/benchmarks.html)**
+**📚 [View Project Website](https://bowenislandsong.github.io/NeuroNetes/)** | **🎯 [See Examples](https://bowenislandsong.github.io/NeuroNetes/website/examples.html)** | **📊 [Performance Benchmarks](https://bowenislandsong.github.io/NeuroNetes/website/benchmarks.html)**
 
 ## Overview
 
