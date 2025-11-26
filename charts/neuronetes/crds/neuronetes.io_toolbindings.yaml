@@ -1,0 +1,246 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: toolbindings.neuronetes.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.0
+spec:
+  group: neuronetes.io
+  names:
+    kind: ToolBinding
+    listKind: ToolBindingList
+    plural: toolbindings
+    shortNames:
+    - tb
+    singular: toolbinding
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ToolBinding is the Schema for the toolbindings API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object.'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents.'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ToolBindingSpec defines the desired state of ToolBinding
+            properties:
+              agentPoolRef:
+                description: AgentPoolRef references the AgentPool to bind
+                properties:
+                  name:
+                    description: Name of the referenced AgentPool
+                    type: string
+                required:
+                - name
+                type: object
+              type:
+                description: Type of binding (http, queue, topic)
+                enum:
+                - http
+                - queue
+                - topic
+                type: string
+              httpConfig:
+                description: HTTPConfig for HTTP bindings
+                properties:
+                  path:
+                    description: Path for the HTTP endpoint
+                    type: string
+                  methods:
+                    description: Methods allowed (GET, POST, etc.)
+                    items:
+                      type: string
+                    type: array
+                  rateLimitPerIP:
+                    description: RateLimitPerIP limits requests per IP
+                    type: string
+                  streamingEnabled:
+                    description: StreamingEnabled allows streaming responses
+                    type: boolean
+                  corsConfig:
+                    description: CORSConfig for cross-origin requests
+                    properties:
+                      allowedOrigins:
+                        items:
+                          type: string
+                        type: array
+                      allowedMethods:
+                        items:
+                          type: string
+                        type: array
+                      allowedHeaders:
+                        items:
+                          type: string
+                        type: array
+                      maxAge:
+                        format: int32
+                        type: integer
+                    type: object
+                type: object
+              queueConfig:
+                description: QueueConfig for queue bindings
+                properties:
+                  provider:
+                    description: Provider (nats, sqs, rabbitmq)
+                    enum:
+                    - nats
+                    - sqs
+                    - rabbitmq
+                    type: string
+                  connectionString:
+                    description: ConnectionString for the queue
+                    type: string
+                  queueName:
+                    description: QueueName to consume from
+                    type: string
+                  autoscaleOnLag:
+                    description: AutoscaleOnLag enables scaling on queue lag
+                    type: boolean
+                  maxLagThreshold:
+                    description: MaxLagThreshold for autoscaling
+                    format: int32
+                    type: integer
+                  prefetchCount:
+                    description: PrefetchCount for consumer
+                    format: int32
+                    type: integer
+                  ackMode:
+                    description: AckMode (auto, manual)
+                    enum:
+                    - auto
+                    - manual
+                    type: string
+                type: object
+              topicConfig:
+                description: TopicConfig for topic bindings
+                properties:
+                  provider:
+                    description: Provider (kafka, pubsub)
+                    enum:
+                    - kafka
+                    - pubsub
+                    type: string
+                  connectionString:
+                    description: ConnectionString for the topic
+                    type: string
+                  topicName:
+                    description: TopicName to subscribe to
+                    type: string
+                  consumerGroup:
+                    description: ConsumerGroup for the subscription
+                    type: string
+                  autoscaleOnLag:
+                    description: AutoscaleOnLag enables scaling on topic lag
+                    type: boolean
+                type: object
+              concurrency:
+                description: Concurrency limits
+                properties:
+                  maxConcurrentRequests:
+                    format: int32
+                    type: integer
+                  maxQueuedRequests:
+                    format: int32
+                    type: integer
+                  perSessionLimit:
+                    format: int32
+                    type: integer
+                type: object
+              timeouts:
+                description: Timeouts configuration
+                properties:
+                  requestTimeout:
+                    description: RequestTimeout for entire request
+                    type: string
+                  toolTimeout:
+                    description: ToolTimeout for individual tool calls
+                    type: string
+                  idleTimeout:
+                    description: IdleTimeout for idle connections
+                    type: string
+                type: object
+              retryPolicy:
+                description: RetryPolicy for failed requests
+                properties:
+                  maxAttempts:
+                    format: int32
+                    type: integer
+                  initialBackoff:
+                    type: string
+                  maxBackoff:
+                    type: string
+                  backoffMultiplier:
+                    type: string
+                  retryableErrors:
+                    items:
+                      type: string
+                    type: array
+                type: object
+            required:
+            - agentPoolRef
+            - type
+            type: object
+          status:
+            description: ToolBindingStatus defines the observed state of ToolBinding
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              phase:
+                enum:
+                - Pending
+                - Bound
+                - Failed
+                type: string
+              endpoint:
+                description: Endpoint is the bound endpoint URL
+                type: string
+              activeConnections:
+                format: int32
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Type
+      type: string
+      jsonPath: .spec.type
+    - name: Pool
+      type: string
+      jsonPath: .spec.agentPoolRef.name
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Endpoint
+      type: string
+      jsonPath: .status.endpoint
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp

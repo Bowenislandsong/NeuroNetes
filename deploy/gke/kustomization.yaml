@@ -1,0 +1,59 @@
+# NeuroNetes GKE Deployment
+# Deploy with: kubectl apply -k deploy/gke/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: neuronetes-system
+
+resources:
+  - ../eks/namespace.yaml
+  - ../../config/crd
+  - ../../config/rbac
+  - ../eks/controller-deployment.yaml
+  - ../eks/scheduler-deployment.yaml
+  - ../eks/autoscaler-deployment.yaml
+  - ../eks/servicemonitor.yaml
+
+# Common labels
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: neuronetes
+      app.kubernetes.io/version: v0.1.0
+      app.kubernetes.io/part-of: neuronetes
+      deployment.kubernetes.io/target: gke
+
+# Configure images
+images:
+  - name: controller
+    newName: ghcr.io/bowenislandsong/neuronetes
+    newTag: v0.1.0
+
+# Patches for GKE-specific configurations
+patches:
+  # Add GCP-specific environment variables
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: GCP_PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: neuronetes-config
+              key: gcp-project-id
+              optional: true
+    target:
+      kind: Deployment
+      name: neuronetes-controller-manager
+  # Add tolerations for GKE GPU taints
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: "nvidia.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+    target:
+      kind: Deployment
+      name: neuronetes-.*

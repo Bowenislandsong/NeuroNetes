@@ -1,0 +1,20 @@
+apiVersion: v2
+name: neuronetes
+description: Agent-Native Kubernetes Framework for AI/LLM workloads
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - kubernetes
+  - ai
+  - llm
+  - ml
+  - gpu
+  - autoscaling
+  - agents
+home: https://github.com/Bowenislandsong/NeuroNetes
+sources:
+  - https://github.com/Bowenislandsong/NeuroNetes
+maintainers:
+  - name: Bowen Song
+    url: https://github.com/Bowenislandsong

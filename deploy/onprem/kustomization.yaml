@@ -1,0 +1,69 @@
+# NeuroNetes On-Premises Deployment
+# Deploy with: kubectl apply -k deploy/onprem/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: neuronetes-system
+
+resources:
+  - ../eks/namespace.yaml
+  - ../../config/crd
+  - ../../config/rbac
+  - ../eks/controller-deployment.yaml
+  - ../eks/scheduler-deployment.yaml
+  - ../eks/autoscaler-deployment.yaml
+  - ../eks/servicemonitor.yaml
+  - storage.yaml
+
+# Common labels
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: neuronetes
+      app.kubernetes.io/version: v0.1.0
+      app.kubernetes.io/part-of: neuronetes
+      deployment.kubernetes.io/target: onprem
+
+# Configure images
+images:
+  - name: controller
+    newName: ghcr.io/bowenislandsong/neuronetes
+    newTag: v0.1.0
+
+# Patches for on-premises configurations
+patches:
+  # Disable cloud-specific features
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: ENABLE_TOKEN_AUTOSCALING
+            value: "true"
+          - name: ENABLE_GPU_TOPOLOGY_SCHEDULING
+            value: "true"
+          - name: ENABLE_SESSION_AFFINITY
+            value: "true"
+          - name: ENABLE_WARM_POOLS
+            value: "true"
+          - name: ENABLE_COST_OPTIMIZATION
+            value: "false"
+          - name: CLOUD_PROVIDER
+            value: "none"
+    target:
+      kind: Deployment
+      name: neuronetes-controller-manager
+  # Lower resource requests for smaller clusters
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+    target:
+      kind: Deployment
+      name: neuronetes-.*

@@ -1,0 +1,62 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "neuronetes.fullname" . }}-manager
+  labels:
+    {{- include "neuronetes.labels" . | nindent 4 }}
+rules:
+  # Core resources
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "configmaps", "secrets", "events", "namespaces"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  
+  # Apps resources
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  # Autoscaling resources
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  # NeuroNetes CRDs
+  - apiGroups: ["neuronetes.io"]
+    resources: ["models", "agentclasses", "agentpools", "toolbindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["neuronetes.io"]
+    resources: ["models/status", "agentclasses/status", "agentpools/status", "toolbindings/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["neuronetes.io"]
+    resources: ["agentpools/scale"]
+    verbs: ["get", "update"]
+  
+  # Coordination for leader election
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  # Events
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "neuronetes.fullname" . }}-manager
+  labels:
+    {{- include "neuronetes.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "neuronetes.fullname" . }}-manager
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "neuronetes.serviceAccountName" . }}
+    namespace: {{ include "neuronetes.namespace" . }}
+{{- end }}

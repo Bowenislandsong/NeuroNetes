@@ -34,6 +34,56 @@ Traditional Kubernetes wasn't designed for AI agents. NeuroNetes solves the hard
 
 ### Installation
 
+Choose your preferred installation method:
+
+#### Option 1: Quickstart Script (Recommended for testing)
+
+```bash
+# Clone the repository
+git clone https://github.com/Bowenislandsong/NeuroNetes.git
+cd NeuroNetes
+
+# Run quickstart script (creates Kind cluster, installs NeuroNetes)
+./scripts/quickstart.sh -k -m -s
+
+# Or install to existing cluster with monitoring and samples
+./scripts/quickstart.sh -m -s
+```
+
+#### Option 2: Helm Chart (Recommended for production)
+
+```bash
+# Install using Helm
+helm install neuronetes ./charts/neuronetes \
+  --namespace neuronetes-system \
+  --create-namespace
+
+# With high availability and monitoring
+helm install neuronetes ./charts/neuronetes \
+  --namespace neuronetes-system \
+  --create-namespace \
+  --set highAvailability.enabled=true \
+  --set metrics.serviceMonitor.enabled=true
+```
+
+#### Option 3: Cloud-Specific Manifests
+
+```bash
+# For AWS EKS
+kubectl apply -k deploy/eks/
+
+# For Google GKE
+kubectl apply -k deploy/gke/
+
+# For Azure AKS
+kubectl apply -k deploy/aks/
+
+# For on-premises
+kubectl apply -k deploy/onprem/
+```
+
+#### Option 4: Manual kubectl
+
 ```bash
 # Install CRDs
 kubectl apply -f config/crd/

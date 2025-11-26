@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: neuronetes-system
+  labels:
+    app.kubernetes.io/name: neuronetes
+    app.kubernetes.io/part-of: neuronetes

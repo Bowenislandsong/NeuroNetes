@@ -71,7 +71,7 @@ test-autoscaler:
 	$(GOTEST) -v -race -coverprofile=autoscaler-coverage.out ./pkg/autoscaler/...
 
 ## test-all: Run all tests
-test-all: test test-metrics test-plugins test-scheduler test-autoscaler test-integration test-e2e
+test-all: test test-metrics test-plugins test-scheduler test-autoscaler test-integration test-e2e test-helm
 
 ## test-integration: Run integration tests
 test-integration:
@@ -82,6 +82,11 @@ test-integration:
 test-e2e:
 	@echo "Running e2e tests..."
 	$(GOTEST) -v -timeout 60m ./test/e2e/...
+
+## test-helm: Run Helm chart tests
+test-helm:
+	@echo "Running Helm chart tests..."
+	@./test/helm/chart_test.sh
 
 ## lint: Run linters
 lint:

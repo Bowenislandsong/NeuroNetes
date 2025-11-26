@@ -1,0 +1,220 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: models.neuronetes.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.0
+spec:
+  group: neuronetes.io
+  names:
+    kind: Model
+    listKind: ModelList
+    plural: models
+    shortNames:
+    - mdl
+    singular: model
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Model is the Schema for the models API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object.'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents.'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ModelSpec defines the desired state of Model
+            properties:
+              architecture:
+                description: Architecture describes the model architecture
+                type: string
+              cachePolicy:
+                description: CachePolicy defines caching behavior for this model
+                properties:
+                  evictionPolicy:
+                    description: EvictionPolicy defines when the model can be evicted
+                    enum:
+                    - never
+                    - idle
+                    - low-priority
+                    type: string
+                  pinDuration:
+                    description: PinDuration is how long to keep the model pinned in cache
+                    type: string
+                  preloadNodes:
+                    description: PreloadNodes is a list of node selectors where model should be preloaded
+                    items:
+                      type: string
+                    type: array
+                  priority:
+                    description: Priority determines eviction order
+                    enum:
+                    - critical
+                    - high
+                    - medium
+                    - low
+                    type: string
+                required:
+                - priority
+                type: object
+              format:
+                description: Format specifies the model format (e.g., safetensors, pytorch, gguf)
+                type: string
+              parameterCount:
+                description: ParameterCount is the number of parameters in the model
+                type: string
+              quantization:
+                description: Quantization specifies the quantization format
+                enum:
+                - fp32
+                - fp16
+                - int8
+                - int4
+                - none
+                type: string
+              shardSpec:
+                description: ShardSpec defines how the model should be sharded across GPUs
+                properties:
+                  count:
+                    description: Count is the number of shards
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  strategy:
+                    description: Strategy defines the sharding strategy
+                    enum:
+                    - tensor-parallel
+                    - pipeline-parallel
+                    - data-parallel
+                    type: string
+                  topology:
+                    description: Topology specifies GPU topology requirements
+                    properties:
+                      locality:
+                        description: Locality specifies the locality requirement
+                        enum:
+                        - same-node
+                        - same-socket
+                        - nvlink
+                        - any
+                        type: string
+                      minBandwidth:
+                        description: MinBandwidth is the minimum inter-GPU bandwidth required (GB/s)
+                        type: string
+                    required:
+                    - locality
+                    type: object
+                required:
+                - count
+                - strategy
+                type: object
+              size:
+                description: Size is the total size of the model weights
+                type: string
+              weightsURI:
+                description: WeightsURI is the location of the model weights (e.g., s3://bucket/path)
+                type: string
+            required:
+            - size
+            - weightsURI
+            type: object
+          status:
+            description: ModelStatus defines the observed state of Model
+            properties:
+              cachedNodes:
+                description: CachedNodes lists nodes where the model is currently cached
+                items:
+                  description: NodeCacheStatus represents caching status on a specific node
+                  properties:
+                    cachedAt:
+                      description: CachedAt is when the model was cached on this node
+                      format: date-time
+                      type: string
+                    nodeName:
+                      description: NodeName is the name of the node
+                      type: string
+                    size:
+                      description: Size is the actual size cached on this node
+                      type: string
+                    status:
+                      description: Status is the cache status on this node
+                      enum:
+                      - loading
+                      - ready
+                      - evicting
+                      - failed
+                      type: string
+                  required:
+                  - nodeName
+                  - status
+                  type: object
+                type: array
+              conditions:
+                description: Conditions represent the latest available observations of the model's state
+                items:
+                  description: Condition contains details for one aspect of the current state
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - status
+                  - type
+                  type: object
+                type: array
+              lastUsed:
+                description: LastUsed is the timestamp of the last usage
+                format: date-time
+                type: string
+              loadTime:
+                description: LoadTime is the time it took to load the model
+                type: string
+              phase:
+                description: Phase represents the current phase of the model
+                enum:
+                - Pending
+                - Loading
+                - Ready
+                - Failed
+                type: string
+              version:
+                description: Version tracks the model version
+                type: string
+            required:
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Size
+      type: string
+      jsonPath: .spec.size
+    - name: Quantization
+      type: string
+      jsonPath: .spec.quantization
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp

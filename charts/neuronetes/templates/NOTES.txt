@@ -1,0 +1,86 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+== Getting Started ==
+
+1. Verify the installation:
+
+   kubectl get pods -n {{ include "neuronetes.namespace" . }}
+   kubectl get crds | grep neuronetes.io
+
+2. Check CRDs are installed:
+
+   kubectl get models,agentclasses,agentpools,toolbindings
+
+3. Deploy a sample model:
+
+   cat <<EOF | kubectl apply -f -
+   apiVersion: neuronetes.io/v1alpha1
+   kind: Model
+   metadata:
+     name: llama-3-8b
+   spec:
+     weightsURI: s3://models/llama-3-8b/
+     size: 16Gi
+     quantization: int8
+     cachePolicy:
+       priority: medium
+       pinDuration: 1h
+   EOF
+
+4. Create an AgentClass:
+
+   cat <<EOF | kubectl apply -f -
+   apiVersion: neuronetes.io/v1alpha1
+   kind: AgentClass
+   metadata:
+     name: my-assistant
+   spec:
+     modelRef:
+       name: llama-3-8b
+     maxContextLength: 8192
+     slo:
+       ttft: 500ms
+       tokensPerSecond: 50
+   EOF
+
+5. Deploy an AgentPool:
+
+   cat <<EOF | kubectl apply -f -
+   apiVersion: neuronetes.io/v1alpha1
+   kind: AgentPool
+   metadata:
+     name: my-pool
+   spec:
+     agentClassRef:
+       name: my-assistant
+     minReplicas: 1
+     maxReplicas: 10
+     prewarmPercent: 20
+   EOF
+
+== Monitoring ==
+
+{{- if .Values.metrics.enabled }}
+Metrics are enabled on port {{ .Values.metrics.port }}.
+
+To access metrics locally:
+  kubectl port-forward -n {{ include "neuronetes.namespace" . }} svc/{{ include "neuronetes.fullname" . }}-metrics {{ .Values.metrics.port }}:{{ .Values.metrics.port }}
+  curl http://localhost:{{ .Values.metrics.port }}/metrics
+{{- end }}
+
+{{- if .Values.metrics.serviceMonitor.enabled }}
+ServiceMonitor is enabled for Prometheus Operator integration.
+{{- end }}
+
+== Documentation ==
+
+- Full documentation: https://github.com/Bowenislandsong/NeuroNetes
+- Examples: https://bowenislandsong.github.io/NeuroNetes/website/examples.html
+- Benchmarks: https://bowenislandsong.github.io/NeuroNetes/website/benchmarks.html
+
+== Support ==
+
+For issues and feature requests:
+https://github.com/Bowenislandsong/NeuroNetes/issues

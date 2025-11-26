@@ -18,7 +18,6 @@ package e2e
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -365,17 +364,14 @@ func TestMetricsRealTimeUpdates(t *testing.T) {
 		defer ticker.Stop()
 
 		count := 0
-		for {
-			select {
-			case <-ticker.C:
-				m.RecordTTFT(ctx, time.Duration(200+count*10)*time.Millisecond, "llama-3-70b", "/chat")
-				m.SetActiveSessions(5 + count%10)
-				m.RecordTokens(ctx, 500, 250, "llama-3-70b")
-				count++
-				if count >= 10 {
-					done <- true
-					return
-				}
+		for range ticker.C {
+			m.RecordTTFT(ctx, time.Duration(200+count*10)*time.Millisecond, "llama-3-70b", "/chat")
+			m.SetActiveSessions(5 + count%10)
+			m.RecordTokens(ctx, 500, 250, "llama-3-70b")
+			count++
+			if count >= 10 {
+				done <- true
+				return
 			}
 		}
 	}()
@@ -638,20 +634,4 @@ func TestMetricsOpenTelemetryIntegration(t *testing.T) {
 	assert.True(t, attrSet.HasValue("agentclass"))
 
 	t.Log("OpenTelemetry integration test passed")
-}
-
-// Helper function to parse Prometheus metric value
-func parsePrometheusMetric(output, metricName string) (float64, error) {
-	lines := strings.Split(output, "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, metricName+" ") && !strings.Contains(line, "#") {
-			parts := strings.Fields(line)
-			if len(parts) >= 2 {
-				var value float64
-				_, err := fmt.Sscanf(parts[1], "%f", &value)
-				return value, err
-			}
-		}
-	}
-	return 0, fmt.Errorf("metric %s not found", metricName)
 }
