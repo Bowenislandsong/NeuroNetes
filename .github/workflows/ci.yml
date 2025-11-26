@@ -216,6 +216,21 @@ jobs:
           files: ./autoscaler-coverage.out
           flags: autoscaler
 
+  test-helm:
+    name: Helm Chart Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.0
+
+      - name: Run Helm chart tests
+        run: make test-helm
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -265,7 +280,7 @@ jobs:
   verify:
     name: Verify All
     runs-on: ubuntu-latest
-    needs: [lint, test-unit, test-integration, test-e2e, test-metrics, test-plugins, test-scheduler, test-autoscaler, build, docker-build]
+    needs: [lint, test-unit, test-integration, test-e2e, test-metrics, test-plugins, test-scheduler, test-autoscaler, test-helm, build, docker-build]
     steps:
       - name: All checks passed
         run: echo "✅ All CI checks passed successfully"

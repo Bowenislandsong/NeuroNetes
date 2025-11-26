@@ -1,6 +1,55 @@
 # Local Development Guide
 
-## Quick Start with Docker Compose
+## Quick Start Options
+
+Choose the fastest method for your use case:
+
+### Option 1: Quickstart Script (Recommended for testing)
+
+```bash
+# Clone and run quickstart
+git clone https://github.com/Bowenislandsong/NeuroNetes.git
+cd NeuroNetes
+
+# Create Kind cluster with monitoring and sample resources
+./scripts/quickstart.sh -k -m -s
+
+# Or install to existing cluster
+./scripts/quickstart.sh -m -s
+```
+
+### Option 2: Helm Chart (Recommended for production)
+
+```bash
+# Install using Helm
+helm install neuronetes ./charts/neuronetes \
+  --namespace neuronetes-system \
+  --create-namespace
+
+# With high availability
+helm install neuronetes ./charts/neuronetes \
+  --namespace neuronetes-system \
+  --create-namespace \
+  --set highAvailability.enabled=true
+```
+
+### Option 3: Cloud-Specific Manifests
+
+```bash
+# For AWS EKS
+kubectl apply -k deploy/eks/
+
+# For Google GKE
+kubectl apply -k deploy/gke/
+
+# For Azure AKS
+kubectl apply -k deploy/aks/
+
+# For on-premises
+kubectl apply -k deploy/onprem/
+```
+
+### Option 4: Docker Compose
 
 The fastest way to test NeuroNetes locally is using Docker Compose:
 
