@@ -51,7 +51,6 @@ kubeconfig
 
 # Generated files (should be regenerated at build time)
 api/v1alpha1/zz_generated.deepcopy.go
-config/crd/neuronetes.io_*.yaml
 config/deploy/neuronetes.yaml
 
 # Local development

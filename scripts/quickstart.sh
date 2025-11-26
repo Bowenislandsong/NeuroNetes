@@ -184,7 +184,10 @@ install_neuronetes() {
         CHART_SOURCE="$CHART_DIR"
     else
         echo "Using Helm chart from repository"
-        helm repo add neuronetes https://bowenislandsong.github.io/NeuroNetes/charts || true
+        # Check if repo already exists
+        if ! helm repo list 2>/dev/null | grep -q "^neuronetes"; then
+            helm repo add neuronetes https://bowenislandsong.github.io/NeuroNetes/charts
+        fi
         helm repo update
         CHART_SOURCE="neuronetes/neuronetes"
     fi

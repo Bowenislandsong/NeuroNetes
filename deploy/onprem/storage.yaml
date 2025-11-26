@@ -1,5 +1,10 @@
 # Storage configuration for on-premises deployment
 # This assumes you have a storage class available or uses local storage
+#
+# IMPORTANT: This is an example configuration. You MUST update:
+#   - The path in PersistentVolume (line 33): Update to your actual storage path
+#   - The node names in nodeAffinity (lines 41-42): Update with your GPU node names
+#   - The storage capacity to match your available storage
 
 ---
 # StorageClass for model cache (local NVMe or SSD recommended)
@@ -14,7 +19,7 @@ volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Retain
 ---
 # Example PersistentVolume for model cache
-# Modify path and nodeAffinity for your environment
+# IMPORTANT: Modify path and nodeAffinity for your environment
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -30,7 +35,8 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: neuronetes-model-cache
   local:
-    path: /data/neuronetes/model-cache  # Update this path
+    # TODO: Update this path to your actual model cache storage location
+    path: /data/neuronetes/model-cache
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -38,7 +44,8 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - gpu-node-1  # Update with your GPU node names
+                # TODO: Update with your actual GPU node hostnames
+                - gpu-node-1
                 - gpu-node-2
 ---
 # PersistentVolumeClaim for model cache

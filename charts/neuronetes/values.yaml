@@ -5,7 +5,8 @@
 image:
   repository: ghcr.io/bowenislandsong/neuronetes
   pullPolicy: IfNotPresent
-  tag: ""  # Defaults to appVersion
+  # Tag defaults to the chart's appVersion if left empty
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

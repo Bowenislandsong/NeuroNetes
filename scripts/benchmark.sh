@@ -98,15 +98,12 @@ check_prerequisites() {
     
     # Check jq
     if ! command -v jq &> /dev/null; then
-        echo -e "${YELLOW}Warning: jq is not installed. Installing...${NC}"
-        if command -v apt-get &> /dev/null; then
-            sudo apt-get install -y jq
-        elif command -v brew &> /dev/null; then
-            brew install jq
-        else
-            echo -e "${RED}Error: Cannot install jq. Please install manually.${NC}"
-            exit 1
-        fi
+        echo -e "${RED}Error: jq is not installed${NC}"
+        echo "Please install jq manually:"
+        echo "  - Ubuntu/Debian: sudo apt-get install jq"
+        echo "  - macOS: brew install jq"
+        echo "  - RHEL/CentOS: sudo yum install jq"
+        exit 1
     fi
     
     # Check cluster connection
@@ -235,7 +232,21 @@ run_benchmark() {
     
     # Calculate throughput
     ACTUAL_DURATION=$(($(date +%s) - START_TIME))
-    RPS=$(echo "scale=2; $SUCCESS_COUNT / $ACTUAL_DURATION" | bc)
+    if [[ $ACTUAL_DURATION -eq 0 ]]; then
+        ACTUAL_DURATION=1
+    fi
+    if [[ $REQUEST_COUNT -eq 0 ]]; then
+        RPS=0
+    else
+        RPS=$(awk "BEGIN {printf \"%.2f\", $SUCCESS_COUNT / $ACTUAL_DURATION}")
+    fi
+    
+    # Calculate success rate safely
+    if [[ $REQUEST_COUNT -eq 0 ]]; then
+        SUCCESS_RATE=0
+    else
+        SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", $SUCCESS_COUNT * 100 / $REQUEST_COUNT}")
+    fi
     
     # Generate results
     cat > "$RESULTS_FILE" <<EOF
@@ -252,7 +263,7 @@ run_benchmark() {
     "total_requests": $REQUEST_COUNT,
     "successful_requests": $SUCCESS_COUNT,
     "failed_requests": $ERROR_COUNT,
-    "success_rate": $(echo "scale=2; $SUCCESS_COUNT * 100 / $REQUEST_COUNT" | bc),
+    "success_rate": $SUCCESS_RATE,
     "requests_per_second": $RPS
   },
   "latency_ms": {
@@ -286,7 +297,7 @@ print_results() {
     echo "  Total Requests: $REQUEST_COUNT"
     echo "  Successful: $SUCCESS_COUNT"
     echo "  Failed: $ERROR_COUNT"
-    echo "  Success Rate: $(echo "scale=1; $SUCCESS_COUNT * 100 / $REQUEST_COUNT" | bc)%"
+    echo "  Success Rate: ${SUCCESS_RATE}%"
     echo "  Requests/sec: $RPS"
     echo ""
     
