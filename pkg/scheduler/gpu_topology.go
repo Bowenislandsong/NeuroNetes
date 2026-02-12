@@ -7,6 +7,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -154,14 +155,23 @@ func (s *GPUTopologyScheduler) hasRequiredGPUs(node *corev1.Node, requirements *
 
 	// Check GPU memory
 	if requirements.Memory != "" {
-		_, ok := node.Labels["neuronetes.io/gpu-memory"]
-		// String comparison for memory labels is not meaningful
-		// In a real implementation, parse these as quantities and compare numerically
+		gpuMemoryStr, ok := node.Labels["neuronetes.io/gpu-memory"]
 		if !ok {
 			return false
 		}
-		// For now, accept if label exists; proper implementation would use
-		// resource.ParseQuantity() to compare memory values
+		// Parse both memory values as quantities for proper comparison
+		nodeMemory, err := resource.ParseQuantity(gpuMemoryStr)
+		if err != nil {
+			return false // Invalid memory format
+		}
+		requiredMemory, err := resource.ParseQuantity(requirements.Memory)
+		if err != nil {
+			return false // Invalid memory format
+		}
+		// Compare: node memory must be >= required memory
+		if nodeMemory.Cmp(requiredMemory) < 0 {
+			return false
+		}
 	}
 
 	return true
