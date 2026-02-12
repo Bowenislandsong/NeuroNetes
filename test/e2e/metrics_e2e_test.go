@@ -272,18 +272,18 @@ func TestMetricsGrafanaDashboardQueries(t *testing.T) {
 
 	// Verify dashboard panel metrics are present
 	dashboardMetrics := map[string]string{
-		"TTFT P95":              "agent_ttft_ms_bucket",
-		"Tokens/Second":         "agent_total_tokens",
-		"Active Sessions":       "agent_active_sessions",
-		"GPU Utilization":       "gpu_util_pct",
-		"Cost per 1K Tokens":    "cost_usd_per_1k_tokens",
-		"KV Cache Hit Ratio":    "agent_kv_cache_hit_ratio",
-		"Batch Efficiency":      "agent_batch_merge_efficiency",
-		"Tool Call Latency":     "agent_tool_latency_ms",
-		"Queue Depth":           "agent_queue_depth",
-		"Input Tokens":          "agent_input_tokens_total",
-		"Output Tokens":         "agent_output_tokens_total",
-		"Turn Latency":          "agent_latency_ms_bucket",
+		"TTFT P95":           "agent_ttft_ms_bucket",
+		"Tokens/Second":      "agent_total_tokens",
+		"Active Sessions":    "agent_active_sessions",
+		"GPU Utilization":    "gpu_util_pct",
+		"Cost per 1K Tokens": "cost_usd_per_1k_tokens",
+		"KV Cache Hit Ratio": "agent_kv_cache_hit_ratio",
+		"Batch Efficiency":   "agent_batch_merge_efficiency",
+		"Tool Call Latency":  "agent_tool_latency_ms",
+		"Queue Depth":        "agent_queue_depth",
+		"Input Tokens":       "agent_input_tokens_total",
+		"Output Tokens":      "agent_output_tokens_total",
+		"Turn Latency":       "agent_latency_ms_bucket",
 	}
 
 	for panel, metric := range dashboardMetrics {

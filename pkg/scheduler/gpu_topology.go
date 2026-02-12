@@ -3,9 +3,11 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -15,7 +17,7 @@ import (
 
 // GPUTopologyScheduler implements GPU-aware scheduling
 type GPUTopologyScheduler struct {
-	clientset *kubernetes.Clientset
+	clientset kubernetes.Interface
 	config    *SchedulerConfig
 }
 
@@ -38,7 +40,7 @@ type SchedulerConfig struct {
 }
 
 // NewGPUTopologyScheduler creates a new scheduler
-func NewGPUTopologyScheduler(clientset *kubernetes.Clientset, config *SchedulerConfig) *GPUTopologyScheduler {
+func NewGPUTopologyScheduler(clientset kubernetes.Interface, config *SchedulerConfig) *GPUTopologyScheduler {
 	return &GPUTopologyScheduler{
 		clientset: clientset,
 		config:    config,
@@ -153,8 +155,21 @@ func (s *GPUTopologyScheduler) hasRequiredGPUs(node *corev1.Node, requirements *
 
 	// Check GPU memory
 	if requirements.Memory != "" {
-		gpuMemory, ok := node.Labels["neuronetes.io/gpu-memory"]
-		if !ok || gpuMemory < requirements.Memory {
+		gpuMemoryStr, ok := node.Labels["neuronetes.io/gpu-memory"]
+		if !ok {
+			return false
+		}
+		// Parse both memory values as quantities for proper comparison
+		nodeMemory, err := resource.ParseQuantity(gpuMemoryStr)
+		if err != nil {
+			return false // Invalid memory format
+		}
+		requiredMemory, err := resource.ParseQuantity(requirements.Memory)
+		if err != nil {
+			return false // Invalid memory format
+		}
+		// Compare: node memory must be >= required memory
+		if nodeMemory.Cmp(requiredMemory) < 0 {
 			return false
 		}
 	}
@@ -298,12 +313,8 @@ func (s *GPUTopologyScheduler) scoreDataLocality(node *corev1.Node, agentPool *n
 }
 
 func sortByScore(results []ScheduleResult) {
-	// Simple bubble sort for now
-	for i := 0; i < len(results)-1; i++ {
-		for j := 0; j < len(results)-i-1; j++ {
-			if results[j].Score < results[j+1].Score {
-				results[j], results[j+1] = results[j+1], results[j]
-			}
-		}
-	}
+	// Use efficient sort.Slice instead of bubble sort
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Score > results[j].Score // descending order
+	})
 }
